@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const MONGODB_URL = 'mongodb://localhost:27017/doTubes';
-const authRouter = require('./routes/auth')
+const authRouter = require('./routes/auth');
+const teamRouter = require('./routes/team');
 const cors =  require('cors');
 
 const app = express();
@@ -12,6 +13,8 @@ app.use(cors()); // enable all cors request
 app.use(express.json()) // parse incoming requests to JSON
 
 app.use('/auth',authRouter);
+
+app.use('/teams',teamRouter);
 
 app.use((error,req,res,next)=>{
     const status = error.statusCode || 500;

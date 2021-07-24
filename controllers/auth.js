@@ -106,7 +106,7 @@ exports.updateUser =  (req,res,next) =>{
         email,
         description,
         oldpassword,
-        password} = req.body;
+        } = req.body;
    
         let user;
         User.findById(mongoose.Types.ObjectId(_id))

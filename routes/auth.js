@@ -2,7 +2,7 @@ const express = require('express');
 
 const controller = require('../controllers/auth');
 
-const {body} = require('express-validator/check')
+const {body} = require('express-validator')
 
 const router = express.Router();
 
@@ -47,7 +47,5 @@ withMessage("Please enter a valid email")
 .normalizeEmail()],controller.isEmailExist)
 
 router.post('/updateUser',isAuth,controller.updateUser)
-
-
 
 module.exports = router;
