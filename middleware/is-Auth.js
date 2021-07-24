@@ -3,40 +3,40 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.js");
 
 module.exports = async (req, res, next) => {
-  const authHeader = req.get("Authorization");
-  if (!authHeader) {
-    handleUnauthorizedRequest();
-  }
-  const token = authHeader.split(" ")[1];
-  let decodedToken;
-  try {
-    decodedToken = jwt.verify(token, "somekeyfromivtech");
-  } catch (error) {
-    error.statusCode = 500;
-    throw error;
-  }
-  if (!decodedToken) {
-    handleUnauthorizedRequest();
-  }
-  req.body._id = decodedToken.userId;
-  let user;
-  try {
-    user = await User.findById(req.body._id);
-    if (user) {
-      req.body.user = user;
-    } else {
-        handleUnauthorizedRequest();
+    const authHeader = req.get("Authorization");
+    if (!authHeader) {
+      handleUnauthorizedRequest(new Error('please enter jwt token'),next);
     }
-  } catch (error) {
-    error.statusCode = 500;
-    error.message = "internal error";
-    throw error;
-  }
-  next();
-};
+    const token = authHeader.split(" ")[1];
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, "somekeyfromivtech");
+    } catch (error) {
+        handleUnauthorizedRequest(error,next);
+    }
+    if (!decodedToken) {
+      handleUnauthorizedRequest(new Error('invalid token'),next);
+    }
 
-const handleUnauthorizedRequest = () => {
-  const error = new Error("not auth");
-  error.statusCode = 401;
-  throw error;
+    req.body._id = decodedToken.userId;
+    let user;
+    try {
+      user = await User.findById(req.body._id);
+      if (user) {
+        req.body.user = user;
+      } else {
+          handleUnauthorizedRequest(new Error('invalid token'),next);
+      }
+    } catch (error) {
+      next(error);
+    }
+    next();
+  };
+
+
+
+const handleUnauthorizedRequest = (error,next) => {
+   error.statusCode = 401;
+   next(error);
+   //using throw error will end up with UnhandledPromiseRejectionWarning
 };
