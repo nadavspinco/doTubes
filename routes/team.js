@@ -6,7 +6,7 @@ const controller = require('../controllers/team');
 
 const isAuth = require('../middleware/is-Auth');
 
-const {body} = require('express-validator')
+const {body} = require('express-validator/check')
 
 router.post('/',[body('teamName')
 .trim()
