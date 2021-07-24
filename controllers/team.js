@@ -9,6 +9,7 @@ const ObjectId = require('mongodb').ObjectId;
 const {validationResult} = require('express-validator')
 
 exports.addTeam = (req,res,next) =>{
+    console.log("here")
     handleErrors(req,402);
     const {teamName,_id,user} = req.body;
     if(user){

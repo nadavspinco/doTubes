@@ -5,6 +5,8 @@ const MONGODB_URL = 'mongodb://localhost:27017/doTubes';
 const authRouter = require('./routes/auth');
 const teamRouter = require('./routes/team');
 const cors =  require('cors');
+var methodOverride = require('method-override')
+
 
 const app = express();
 
@@ -16,12 +18,16 @@ app.use('/auth',authRouter);
 
 app.use('/teams',teamRouter);
 
-app.use((error,req,res,next)=>{
+app.use(methodOverride())
+app.use(function (error,req,res,next){
+    console.log(error);
     const status = error.statusCode || 500;
     const message = error.message;
     const data = error.data
     res.status(status).json({message:message,data: data});
 })
+
+
 
 mongoose.connect(MONGODB_URL,
     { useNewUrlParser: true,
