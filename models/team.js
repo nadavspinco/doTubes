@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 const validator = require('mongoose-validator')
 
 const userSchema = new Schema({
+
     name: {
         type: String,
         required: true
@@ -18,6 +19,7 @@ const userSchema = new Schema({
             ref: 'User',
         }]
     }
+    
 })
 
 module.exports = mongoose.model('Team',userSchema)

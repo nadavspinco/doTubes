@@ -34,6 +34,13 @@ const userSchema = new Schema({
     },
     description : {
         type: String,
+    },
+    teams : {
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Team',
+        }],
+        default: []
     }
     
 })

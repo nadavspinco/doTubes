@@ -13,4 +13,6 @@ router.post('/',[body('teamName')
 .not()
 .isEmpty()],isAuth,controller.addTeam);
 
+router.post('/join',isAuth,controller.joinTeam)
+
 module.exports = router;
