@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-const controller = require("../controllers/team");
+const controller = require("../controllers/tube");
 
 const isAuth = require("../middleware/is-Auth");
 
@@ -10,16 +10,9 @@ const { body } = require("express-validator/check");
 
 router.post(
   "/",
-  [body("teamName").trim().not().isEmpty()],
+  [body("teamId").trim().not().isEmpty(), body("name").trim().not().isEmpty()],
   isAuth,
-  controller.addTeam
-);
-
-router.post(
-  "/join",
-  [body("teamId").trim().not().isEmpty()],
-  isAuth,
-  controller.joinTeam
+  controller.addTube
 );
 
 module.exports = router;
