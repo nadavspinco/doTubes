@@ -1,18 +1,25 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
 
-const controller = require('../controllers/team');
+const controller = require("../controllers/team");
 
-const isAuth = require('../middleware/is-Auth');
+const isAuth = require("../middleware/is-Auth");
 
-const {body} = require('express-validator/check')
+const { body } = require("express-validator/check");
 
-router.post('/',[body('teamName')
-.trim()
-.not()
-.isEmpty()],isAuth,controller.addTeam);
+router.post(
+  "/",
+  [body("teamName").trim().not().isEmpty()],
+  isAuth,
+  controller.addTeam
+);
 
-router.post('/join',isAuth,controller.joinTeam)
+router.post(
+  "/join",
+  [body(teamId).trim().not().isEmpty()],
+  isAuth,
+  controller.joinTeam
+);
 
 module.exports = router;
