@@ -1,8 +1,18 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const validator = require("mongoose-validator");
 
 const userSchema = new Schema({
+  totalScore: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+
+  currentScore: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
   name: {
     type: String,
     required: true,
@@ -10,6 +20,11 @@ const userSchema = new Schema({
   admin: {
     type: Schema.Types.ObjectId,
     ref: "User",
+    required: true,
+  },
+  team: {
+    type: Schema.Types.ObjectId,
+    ref: "Team",
     required: true,
   },
   users: {
@@ -20,16 +35,6 @@ const userSchema = new Schema({
       },
     ],
   },
-  tubes: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Tube",
-      },
-    ],
-    required: true,
-    default: [],
-  },
 });
 
-module.exports = mongoose.model("Team", userSchema);
+module.exports = mongoose.model("Tube", userSchema);

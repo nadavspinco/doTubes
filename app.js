@@ -4,6 +4,7 @@ const router = express.Router();
 const MONGODB_URL = "mongodb://localhost:27017/doTubes";
 const authRouter = require("./routes/auth");
 const teamRouter = require("./routes/team");
+const tubeRouter = require('./routes/tube')
 const cors = require("cors");
 var methodOverride = require("method-override");
 
@@ -16,6 +17,8 @@ app.use(express.json()); // parse incoming requests to JSON
 app.use("/auth", authRouter);
 
 app.use("/teams", teamRouter);
+
+app.use("/tubes", tubeRouter);
 
 app.use(methodOverride());
 app.use(function (error, req, res, next) {
