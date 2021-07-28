@@ -1,8 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const compression = require('compression');
+const helmet = require('helmet');
 const router = express.Router();
-const MONGODB_URL =
-  "mongodb+srv://doTubes:BxtTqKRkZkslFiFr@dotubes.rxz2c.mongodb.net/doTubes?retryWrites=true&w=majority";;
+require("dotenv").config();
+
+const MONGODB_URL = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@dotubes.rxz2c.mongodb.net/doTubes?retryWrites=true&w=majority `;
 const authRouter = require("./routes/auth");
 const teamRouter = require("./routes/team");
 const tubeRouter = require('./routes/tube');
@@ -13,6 +16,10 @@ var methodOverride = require("method-override");
 const app = express();
 
 app.use(cors()); // enable all cors request
+
+app.use(helmet());
+
+app.use(compression());
 
 app.use(express.json()); // parse incoming requests to JSON
 
