@@ -40,7 +40,25 @@ router.post(
   controller.signup
 );
 
-router.post("/login", controller.login);
+router.post(
+  "/login",
+  body("password")
+    .trim()
+    .not()
+    .isEmpty(),
+  body("email")
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .custom((value, { req }) => {
+      return User.findOne({ email: value }).then((userDoc) => {
+        if (!userDoc) {
+          return Promise.reject("Email not exists");
+        }
+      });
+    })
+    .normalizeEmail(),
+  controller.login
+);
 
 router.get("/userData", isAuth, controller.getUserData);
 

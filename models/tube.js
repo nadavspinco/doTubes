@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
+const tubeSchema = new Schema({
   totalScore: {
     type: Number,
     required: true,
@@ -27,6 +27,16 @@ const userSchema = new Schema({
     ref: "Team",
     required: true,
   },
+
+  tasks: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
+    default: [],
+  },
   users: {
     type: [
       {
@@ -37,4 +47,4 @@ const userSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("Tube", userSchema);
+module.exports = mongoose.model("Tube", tubeSchema);

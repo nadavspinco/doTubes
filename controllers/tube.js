@@ -5,7 +5,9 @@ const User = require("../models/user.js");
 const ObjectId = require("mongodb").ObjectId;
 
 const Tube = require("../models/tube.js");
+
 exports.addTube = async (req, res, next) => {
+    handleErrors(req, res, next, 402);
   const { teamId, name, user, _id } = req.body;
   const team = await Team.findById(teamId);
   if (!team) {
