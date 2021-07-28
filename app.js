@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const router = express.Router();
 require("dotenv").config();
 
-const MONGODB_URL = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@dotubes.rxz2c.mongodb.net/doTubes?retryWrites=true&w=majority `;
+const MONGODB_URL = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@dotubes.rxz2c.mongodb.net/doTubes?retryWrites=true&w=majority`;
 const authRouter = require("./routes/auth");
 const teamRouter = require("./routes/team");
 const tubeRouter = require('./routes/tube');
@@ -17,7 +17,7 @@ const app = express();
 
 app.use(cors()); // enable all cors request
 
-app.use(helmet());
+//app.use(helmet());
 
 app.use(compression());
 
