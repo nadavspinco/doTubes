@@ -21,6 +21,14 @@ exports.addTeam = (req, res, next) => {
     });
     team
       .save()
+      .then(result => {
+        if (result) {
+          user.teams.addToSet(team._id);
+          return user.save();
+        } else {
+          res.status(500).json({ message: "error" });
+        }
+      })
       .then((result) => {
         if (result) {
           res.json({ team: result._doc, message: "team is added" }).status(201);
@@ -81,4 +89,17 @@ exports.joinTeam = async (req, res, next) => {
       return;
     }
   });
+};
+
+exports.getTeams = async (req, res, next) => {
+  const { user } = req.body;
+  try {
+    const teams = await Promise.all(user.teams.map(teamId => {
+      return Team.findById(teamId);
+    }))
+    res.json({ teams });
+  } catch (error) {
+    res.json({ message: "action faild" }).status(500);
+  }
+
 };
