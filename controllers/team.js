@@ -11,7 +11,7 @@ const ObjectId = require("mongodb").ObjectId;
 const { validationResult } = require("express-validator");
 
 exports.addTeam = (req, res, next) => {
-  handleErrors(req, 402);
+  handleErrors(req,res,next, 402);
   const { teamName, _id, user } = req.body;
   if (user) {
     const team = new Team({
@@ -37,6 +37,7 @@ exports.addTeam = (req, res, next) => {
 };
 
 exports.joinTeam = async (req, res, next) => {
+  handleErrors(req, res, next, 402);
     const { teamId, user, _id } = req.body;
     try {
         team = await Team.findById(teamId);

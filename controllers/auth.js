@@ -24,7 +24,7 @@ const createToken = (email, userId) => {
 };
 
 exports.isEmailExist = (req, res, next) => {
-  handleErrors(req);
+  handleErrors(req,res,next);
   const { email } = req.body;
   User.findOne({ email: email })
     .then((result) => {
@@ -41,7 +41,7 @@ exports.isEmailExist = (req, res, next) => {
 };
 
 exports.signup = (req, res, next) => {
-  handleErrors(req, 402);
+  handleErrors(req,res,next, 402);
   const { email, fullName, password } = req.body;
   let user;
   bcrypt
@@ -76,7 +76,7 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  handleErrors(req, 402);
+  handleErrors(req,res,next, 402);
   const { email, password } = req.body;
   let user;
   User.findOne({ email: email })
@@ -110,6 +110,7 @@ exports.login = (req, res, next) => {
 };
 
 exports.updateUser = (req, res, next) => {
+  handleErrors(req, res, next, 402);
   const { _id, fullName, role, email, description, oldpassword } = req.body;
 
   let user;
@@ -148,7 +149,7 @@ exports.updateUser = (req, res, next) => {
     });
 };
 exports.getUserData = (req, res, next) => {
-  handleErrors(req);
+  handleErrors(req,res,next);
   const { _id } = req.body;
   User.findById(mongoose.Types.ObjectId(_id))
     .then((result) => {
