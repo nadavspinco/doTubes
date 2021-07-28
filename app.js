@@ -36,6 +36,6 @@ mongoose
   .connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {
     console.log("server is running");
-    app.listen(8080);
+    app.listen(process.env.PORT || 8080);
   })
   .catch((error) => console.log(error));
