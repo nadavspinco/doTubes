@@ -6,7 +6,7 @@ const controller = require("../controllers/tube");
 
 const isAuth = require("../middleware/is-Auth");
 
-const { body } = require("express-validator/check");
+const { body } = require("express-validator");
 
 router.post(
   "/",

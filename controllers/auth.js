@@ -41,7 +41,8 @@ exports.isEmailExist = (req, res, next) => {
 };
 
 exports.signup = (req, res, next) => {
-  handleErrors(req,res,next, 402);
+
+  handleErrors(req,res,next, 400);
   const { email, fullName, password } = req.body;
   let user;
   bcrypt
@@ -76,7 +77,7 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  handleErrors(req,res,next, 402);
+  handleErrors(req,res,next, 403);
   const { email, password } = req.body;
   let user;
   User.findOne({ email: email })
