@@ -31,7 +31,7 @@ exports.addTeam = (req, res, next) => {
       })
       .then((result) => {
         if (result) {
-          res.json({ team: result._doc, message: "team is added" }).status(201);
+          res.json({ team: team, message: "team is added" }).status(201);
         } else {
           res.status(500).json({ message: "error" });
         }
