@@ -5,14 +5,20 @@ const User = require("../models/user.js");
 const ObjectId = require("mongodb").ObjectId;
 
 const Tube = require("../models/tube.js");
+const { handleErrors } = require("./error.js");
 
 exports.addTube = async (req, res, next) => {
     handleErrors(req, res, next, 402);
   const { teamId, name, user, _id } = req.body;
-  const team = await Team.findById(teamId);
-  if (!team) {
-    res.status(404).json({ message: "team is not exists" });
-    return;
+  try {
+    const team = await Team.findById(teamId);
+    if (!team) {
+      res.status(404).json({ message: "team is not exists" });
+      return;
+    }
+  } catch (error) {
+   res.status(404).json({ message: "team is not exists" });
+   return;
   }
   const teamUser = team.users.find((teamUser) => teamUser.toString() === _id);
   if (!teamUser) {
@@ -39,7 +45,7 @@ exports.addTube = async (req, res, next) => {
       if (!result) {
         res.status(500).json({ message: "creating tube failed" });
       }
-      res.status(201).json({ message: "tube is created", tube: result });
+      res.status(201).json({ message: "tube is created", tube: tube });
     })
     .catch((error) => {
       console.log(error);
