@@ -18,6 +18,9 @@ describe("auth", () => {
       useUnifiedTopology: true,
     });
   })
+  after(() => {
+    return mongoose.disconnect();
+  })
 
 
   afterEach(() => {
