@@ -65,14 +65,16 @@ exports.joinTeam = async (req, res, next) => {
         team.users.addToSet(new ObjectId(_id));
         const newLength = team.users.length;
         if (oldLength === newLength) {
-          throw new Error("user already in the team").status(500);
-          }
+          next((new Error('you already in that team')))
+          return;
+        }
+      }
         else {
-            throw new Error("unable to find the wanted team").status(404);
+            throw new Error("unable to find the wanted team");
           }
         await team.save();
-      }
-    } catch (error) {
+
+    }catch (error) {
       res.json({ message: error.message }).status(error.status);
       return;
     }
