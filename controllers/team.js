@@ -31,7 +31,7 @@ exports.addTeam = (req, res, next) => {
       })
       .then((result) => {
         if (result) {
-          res.json({ team: team, message: "team is added" }).status(201);
+          res.status(201).json({ team: team, message: "team is added" });
         } else {
           res.status(500).json({ message: "error" });
         }
@@ -50,10 +50,11 @@ exports.joinTeam = async (req, res, next) => {
     try {
         team = await Team.findById(teamId);
         if (!team) {
-            throw new Error();
+          next(new Error('id is invalid'), req, res);
+          return;
         }
     } catch (error) {
-        res.json({ message: "unable to find the wanted team" }.status(404));
+        res.status(404).json({ message: "unable to find the wanted team" });
          return;
     }
   const session = await Team.startSession();
