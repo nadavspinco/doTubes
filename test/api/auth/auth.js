@@ -10,6 +10,7 @@ const { deleteOne } = require("../../../models/user");
 
 
 describe("auth", () => {
+  let jwt;
   before(() => {
     
     const uri = "mongodb://localhost:27017/doTubes";
@@ -66,7 +67,10 @@ describe("auth", () => {
           fullName: "avi c",
           password: "123456Aa!",
         })
-        .expect(201);
+        .expect(201)
+        .then(res => {
+          jwt = res.body.jwt;
+        })
     });
     it("login succeed ", () => {
       return request(app)
@@ -104,5 +108,24 @@ describe("auth", () => {
           chaiExpect(res.body).to.not.have.property("jwt");
         });
     });
+
+    it("get user data succeed", () => {
+      return request(app)
+        .get("/auth/userData")
+        .set("Authorization", "Bearer " + jwt)
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("user");
+          const { user } = res.body;
+          chaiExpect(user).to.have.property("email", "kso@walla.com");
+          chaiExpect(user).to.have.property("fullName",'avi c');
+        });
+    })
+        it("get user failed wrong jwt", () => {
+          return request(app)
+            .get("/auth/userData")
+            .set("Authorization", "Bearer " + jwt + "a")
+            .expect(401)
+        });
   })
 });

@@ -150,18 +150,7 @@ exports.updateUser = (req, res, next) => {
     });
 };
 exports.getUserData = (req, res, next) => {
-  handleErrors(req,res,next);
-  const { _id } = req.body;
-  User.findById(mongoose.Types.ObjectId(_id))
-    .then((result) => {
-      if (result) {
-        res.json({ user: result });
-      } else {
-        res.status(404).json({ message: "user was not found" });
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      throw new Error("error");
-    });
+  handleErrors(req,res,next,401);
+  const { user } = req.body;
+  res.json({ user: user });
 };
