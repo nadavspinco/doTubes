@@ -30,6 +30,8 @@ const teamSchema = new Schema({
     required: true,
     default: [],
   },
+
+  
 });
 
 module.exports = mongoose.model("Team", teamSchema);

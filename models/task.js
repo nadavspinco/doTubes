@@ -12,6 +12,9 @@ const taskSchema = new Schema({
     type: String,
     required: true,
   },
+  dicription: {
+    type: String,
+  },
   exacutor: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -32,6 +35,16 @@ const taskSchema = new Schema({
     required: true,
     default: "pending",
   },
-});
+  startDateTime: {
+    type: Date,
+  },
+  endDateTime: {
+    type: Date,
+  },
+  estimatedDateTime: {
+    type: Date,
+  },
+
+}, { timestamps: true });
 
 module.exports = mongoose.model("Task", taskSchema);
