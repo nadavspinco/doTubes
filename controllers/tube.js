@@ -8,10 +8,11 @@ const Tube = require("../models/tube.js");
 const { handleErrors } = require("./error.js");
 
 exports.addTube = async (req, res, next) => {
-    handleErrors(req, res, next, 402);
+  handleErrors(req, res, next, 402);
+  let team;
   const { teamId, name, user, _id } = req.body;
   try {
-    const team = await Team.findById(teamId);
+     team = await Team.findById(teamId);
     if (!team) {
       res.status(404).json({ message: "team is not exists" });
       return;
