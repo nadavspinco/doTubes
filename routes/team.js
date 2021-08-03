@@ -22,6 +22,8 @@ router.post(
   controller.joinTeam
 );
 
+
+
 router.get("/", isAuth, controller.getTeams);
 
 module.exports = router;

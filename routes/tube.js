@@ -15,4 +15,17 @@ router.post(
   controller.addTube
 );
 
+router.post(
+  "/",
+  [body("teamId").trim().not().isEmpty(), body("name").trim().not().isEmpty()],
+  isAuth,
+  controller.addTube
+);
+
+router.get(
+  "/all/:teamId",
+  isAuth,
+  controller.getTubes
+);
+
 module.exports = router;

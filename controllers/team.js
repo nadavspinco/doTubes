@@ -92,6 +92,7 @@ exports.joinTeam = async (req, res, next) => {
   });
 };
 
+
 exports.getTeams = async (req, res, next) => {
   const { user } = req.body;
   try {
