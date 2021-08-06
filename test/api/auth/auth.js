@@ -128,4 +128,102 @@ describe("auth", () => {
             .expect(401)
         });
   })
+  describe("update user", () => {
+       beforeEach(() => {
+         return request(app)
+           .post("/auth/signup")
+           .send({
+             email: "kso@walla.com",
+             fullName: "avi c",
+             password: "123456Aa!",
+           })
+           .expect(201)
+           .then((res) => {
+             jwt = res.body.jwt;
+           });
+       });
+    
+    it("update user succeed", () => {
+      return request(app)
+        .put("/auth/updateUser")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          email: "user3@walla.com",
+          role: "hr",
+          fullName: "avi",
+          description: "hr recruitment",
+        })
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("user");
+          const { user } = res.body;
+          chaiExpect(user).to.have.property("email", "user3@walla.com");
+          chaiExpect(user).to.have.property("fullName", "avi");
+          chaiExpect(user).to.have.property("role", "hr");
+          chaiExpect(user).to.have.property("description", "hr recruitment");
+        });
+    });
+
+    
+    it("update user with new password succeed", () => {
+      return request(app)
+        .put("/auth/updateUser")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          email: "user3@walla.com",
+          role: "hr",
+          fullName: "avi",
+          description: "hr recruitment",
+          newPassword: "98745613As@",
+          oldPassword: "123456Aa!",
+        })
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("user");
+          const { user } = res.body;
+          chaiExpect(user).to.have.property("email", "user3@walla.com");
+          chaiExpect(user).to.have.property("fullName", "avi");
+          chaiExpect(user).to.have.property("role", "hr");
+          chaiExpect(user).to.have.property("description", "hr recruitment");
+        });
+    });
+      
+      
+    it("update user failed, no old password", () => {
+      return request(app)
+        .put("/auth/updateUser")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          email: "user3@walla.com",
+          role: "hr",
+          fullName: "avi",
+          description: "hr recruitment",
+          newPassword: "98745613As@"
+        })
+        .expect(401)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("user");
+        });
+    });
+    it("update user failed, old password don't match", () => {
+      return request(app)
+        .put("/auth/updateUser")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          email: "user3@walla.com",
+          role: "hr",
+          fullName: "avi",
+          description: "hr recruitment",
+          newPassword: "98745613As@",
+          oldPassword: "123496Aa!"
+        })
+        .expect(401)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("user");
+        });
+    });
+      
+
+  
+  });
 });

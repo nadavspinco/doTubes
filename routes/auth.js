@@ -72,6 +72,16 @@ router.post(
   controller.isEmailExist
 );
 
-router.post("/updateUser", isAuth, controller.updateUser);
+router.put("/updateUser",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email")
+      .normalizeEmail(),
+ body("newPassword")
+   .custom((value, { req }) => {
+        return value === undefined || validatePassword(value);
+      }).trim()],
+   isAuth, controller.updateUser);
 
 module.exports = router;

@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
     if (user) {
       req.body.user = user;
     } else {
-      handleUnauthorizedRequest(new Error("invalid token"), next);
+      handleUnauthorizedRequest(new Error("invalid token user not in db"), next);
     }
   } catch (error) {
     next(error);
