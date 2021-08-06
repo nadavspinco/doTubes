@@ -24,7 +24,7 @@ const createToken = (email, userId) => {
 };
 
 exports.isEmailExist = (req, res, next) => {
-  handleErrors(req,res,next);
+  handleErrors(req, res, next,400);
   const { email } = req.body;
   User.findOne({ email: email })
     .then((result) => {
@@ -41,8 +41,7 @@ exports.isEmailExist = (req, res, next) => {
 };
 
 exports.signup = (req, res, next) => {
-
-  handleErrors(req,res,next, 400);
+  handleErrors(req, res, next, 400);
   const { email, fullName, password } = req.body;
   let user;
   bcrypt
@@ -77,7 +76,7 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  handleErrors(req,res,next, 403);
+  handleErrors(req, res, next, 403);
   const { email, password } = req.body;
   let user;
   User.findOne({ email: email })
@@ -110,37 +109,45 @@ exports.login = (req, res, next) => {
     });
 };
 
-exports.updateUser = (req, res, next) => {
-  handleErrors(req, res, next, 402);
-  const { _id, fullName, role, email, description, oldpassword } = req.body;
-
-  let user;
-  User.findById(mongoose.Types.ObjectId(_id))
+exports.updateUser = async (req, res, next) => {
+  handleErrors(req, res, next, 400);
+  const {
+    _id,
+    fullName,
+    role,
+    email,
+    description,
+    oldPassword,
+    newPassword,
+    user,
+  } = req.body;
+  if (newPassword) {
+    if (!oldPassword) {
+      res
+        .status(401)
+        .json({
+          message:
+            "user is not updated, old password is required in order to change the password",
+        });
+      return;
+    }
+    const toChangePassword = await bcrypt.compare(oldPassword, user.password);
+    if (toChangePassword) {
+      user.password = await bcrypt.hash(newPassword, 12);
+    } else {
+      res.status(401).json({ message: "user is not updated, wrong password" });
+      return;
+    }
+  }
+  user.fullName = fullName;
+  user.email = email;
+  user.role = role;
+  user.description = description;
+  user
+    .save()
     .then((result) => {
       if (result) {
-        user = result;
-        return bcrypt.compare(oldpassword, user.password);
-      } else {
-        res.status(500).json({ message: "user is not updated" });
-      }
-    })
-    .then(async (result) => {
-      if (result === true) {
-        user.fullName = fullName;
-        user.email = email;
-        user.role = role;
-        user.description = description;
-        if (password) {
-          user.password = await bcrypt.hash(password, 12);
-        }
-        return user.save();
-      } else {
-        res.status(500).json({ message: "user is not updated" });
-      }
-    })
-    .then((result) => {
-      if (result) {
-        res.json({ message: "user updated!" });
+        res.json({ message: "user updated!", user: user });
       }
     })
     .catch((err) => {
@@ -150,7 +157,7 @@ exports.updateUser = (req, res, next) => {
     });
 };
 exports.getUserData = (req, res, next) => {
-  handleErrors(req,res,next,401);
+  handleErrors(req, res, next, 401);
   const { user } = req.body;
   res.json({ user: user });
 };
