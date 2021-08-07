@@ -19,6 +19,7 @@ const taskSchema = new Schema(
     exacutor: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     tube: {
       type: Schema.Types.ObjectId,
@@ -45,7 +46,6 @@ const taskSchema = new Schema(
     estimatedDateTime: {
       type: Date,
     },
-    
   },
   { timestamps: true }
 );

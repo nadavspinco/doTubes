@@ -19,6 +19,7 @@ router.post(
     body("score").isDecimal({ min: 10, max: 100 }),
     body("name").trim().not().isEmpty(),
     body("tubeId").trim().not().isEmpty(),
+    body("userId").trim().not().isEmpty()
   ],
   isAuth,
   controller.addTask
