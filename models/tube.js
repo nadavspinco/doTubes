@@ -45,6 +45,9 @@ const tubeSchema = new Schema({
       },
     ],
   },
+  color: {
+    type: String,
+  },
 });
 
 module.exports = mongoose.model("Tube", tubeSchema);

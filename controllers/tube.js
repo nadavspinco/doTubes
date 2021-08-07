@@ -10,7 +10,7 @@ const { handleErrors } = require("./error.js");
 exports.addTube = async (req, res, next) => {
   handleErrors(req, res, next, 400);
   let team;
-  const { teamId, name, user, _id } = req.body;
+  const { teamId, name, user, _id, color } = req.body;
   try {
     team = await Team.findById(teamId);
     if (!team) {
@@ -31,6 +31,7 @@ exports.addTube = async (req, res, next) => {
     team: team._id,
     admin: user._id,
     users: [user._id],
+    color: color,
   });
   tube
     .save()
