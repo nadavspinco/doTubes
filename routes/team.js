@@ -22,7 +22,7 @@ router.post(
   controller.joinTeam
 );
 
-
+router.get("/:teamId", isAuth, controller.getTeamDeatils);
 
 router.get("/", isAuth, controller.getTeams);
 

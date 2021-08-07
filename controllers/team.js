@@ -92,6 +92,31 @@ exports.joinTeam = async (req, res, next) => {
   });
 };
 
+exports.getTeamDeatils = async (req, res, next) => {
+  const { user, _id } = req.body;
+  const { teamId } = req.params;
+  try {
+    const team = await Team.findById(teamId);
+
+    if (!team) {
+      res.status(404).json({ message: "team is not found" });
+      return;
+    }
+    if (!team.users.includes(new ObjectId(_id))) {
+      res.status(401).json({ message: "unauthorized" });
+      return;
+    }
+    await team
+      .populate("admin")
+      .populate("users")
+      .populate("tubes")
+      .execPopulate();
+    res.json({ team });
+  } catch (error) {
+    res.status(500).json({ message: "server error" });
+    return;
+  }
+};
 
 exports.getTeams = async (req, res, next) => {
   const { user } = req.body;
