@@ -6,7 +6,7 @@ const request = require("supertest");
 const { assert, expect: chaiExpect } = require("chai");
 
 describe("auth", () => {
-    let jwt, teamId, jwt2;
+    let jwt, teamId, jwt2,jwt3,userId;
     before(() => {
         const uri = "mongodb://localhost:27017/doTubes";
         return mongoose.connect(uri, {
@@ -35,6 +35,7 @@ describe("auth", () => {
                 })
                 .then((res) => {
                     jwt = res.body.jwt;
+                    userId = res.body.userId;
                 });
         })
         before(() => {
@@ -47,6 +48,18 @@ describe("auth", () => {
                 })
                 .then((res) => {
                     jwt2 = res.body.jwt;
+                });
+        });
+         before(() => {
+            return request(app)
+                .post("/auth/signup")
+                .send({
+                    email: "user3@walla.com",
+                    fullName: "gabi",
+                    password: "123456Aa!",
+                })
+                .then((res) => {
+                    jwt3 = res.body.jwt;
                 });
         });
         it("add team successfully", () => {
@@ -107,6 +120,54 @@ describe("auth", () => {
             .expect(401);
         });
     });
+
+    describe("get teams", () => {
+        it("get all teams by user", () => {
+            return request(app)
+                .get("/teams/")
+                .set("Authorization", "Bearer " + jwt)
+                .expect(200)
+                .then(res => {
+                    chaiExpect(res.body).to.have.property("teams");
+                })
+        });
+
+          it("get team by teamId", () => {
+            return request(app)
+              .get("/teams/"+teamId)
+              .set("Authorization", "Bearer " + jwt2)
+              .expect(200)
+              .then((res) => {
+                  chaiExpect(res.body).to.have.property("team");
+                  chaiExpect(res.body.team).to.have.property("users");
+                  chaiExpect(res.body.team).to.have.property("admin");
+                  chaiExpect(res.body.team).to.have.property("tubes");
+              });
+
+          });
+        
+        
+          it("get team by teamId, unauthorized jwt", () => {
+            return request(app)
+              .get("/teams/"+teamId)
+              .set("Authorization", "Bearer " + jwt3)
+              .expect(401)
+              .then((res) => {
+                chaiExpect(res.body).to.not.have.property("team");
+              });
+          });
+        
+        it("get team by teamId,team does not exist", () => {
+         
+            return request(app)
+              .get("/teams/"  + userId)
+              .set("Authorization", "Bearer " + jwt3)
+              .expect(404)
+              .then((res) => {
+                chaiExpect(res.body).to.not.have.property("team");
+              });
+          });
+    })
 
     
 
