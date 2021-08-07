@@ -5,14 +5,15 @@ exports.handleErrors = (
   res,
   next,
   statusCode,
-  message = "Validation Faild"
+  message
 ) => {
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new Error(message);
     error.statusCode = statusCode;
     error.data = errors.array();
-    next(error, req, res);
+    throw error;
   }
 
 };

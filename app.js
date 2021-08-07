@@ -32,7 +32,11 @@ app.use("/tasks", taskRouter);
 
 app.use(methodOverride());
 app.use(function (error, req, res, next) {
-  const status = error.statusCode || 500;
+
+  let status = 500;
+  if (error.statusCode) {
+    status = error.statusCode; 
+  }
   const message = error.message;
   const data = error.data;
   res.status(status).json({ message: message, data: data });
