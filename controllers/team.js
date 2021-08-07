@@ -45,51 +45,55 @@ exports.addTeam = (req, res, next) => {
 };
 
 exports.joinTeam = async (req, res, next) => {
-  handleErrors(req, res, next, 402);
-  const { teamId, user, _id } = req.body;
   try {
-    team = await Team.findById(teamId);
-    if (!team) {
-      next(new Error("id is invalid"), req, res);
+    handleErrors(req, res, next, 400);
+    const { teamId, user, _id } = req.body;
+    try {
+      team = await Team.findById(teamId);
+      if (!team) {
+        next(new Error("id is invalid"), req, res);
+        return;
+      }
+    } catch (error) {
+      res.status(404).json({ message: "unable to find the wanted team" });
       return;
     }
-  } catch (error) {
-    res.status(404).json({ message: "unable to find the wanted team" });
-    return;
-  }
-  const session = await Team.startSession();
-  await session.withTransaction(async () => {
-    try {
-      if (team) {
-        const oldLength = team.users.length;
-        team.users.addToSet(new ObjectId(_id));
-        const newLength = team.users.length;
-        if (oldLength === newLength) {
-          next(new Error("you already in that team"));
-          return;
+    const session = await Team.startSession();
+    await session.withTransaction(async () => {
+      try {
+        if (team) {
+          const oldLength = team.users.length;
+          team.users.addToSet(new ObjectId(_id));
+          const newLength = team.users.length;
+          if (oldLength === newLength) {
+            next(new Error("you already in that team"));
+            return;
+          }
+        } else {
+          throw new Error("unable to find the wanted team");
         }
-      } else {
-        throw new Error("unable to find the wanted team");
+        await team.save();
+      } catch (error) {
+        res.json({ message: error.message }).status(error.status);
+        return;
       }
-      await team.save();
-    } catch (error) {
-      res.json({ message: error.message }).status(error.status);
-      return;
-    }
-    try {
-      user.teams.addToSet(new ObjectId(team._id));
-      result = await user.save();
-      if (result) {
-        res.json({ message: "added succsfuly" }).status(200);
-      } else {
-        res.json({ message: "added failed" }).status(500);
-        session.abortTransaction();
+      try {
+        user.teams.addToSet(new ObjectId(team._id));
+        result = await user.save();
+        if (result) {
+          res.json({ message: "added succsfuly" }).status(200);
+        } else {
+          res.json({ message: "added failed" }).status(500);
+          session.abortTransaction();
+        }
+      } catch (error) {
+        res.json({ message: "failed" }).status(500);
+        return;
       }
-    } catch (error) {
-      res.json({ message: "failed" }).status(500);
-      return;
-    }
-  });
+    });
+  } catch (error) {
+    next(error, req, res);
+  }
 };
 
 exports.getTeamDeatils = async (req, res, next) => {
