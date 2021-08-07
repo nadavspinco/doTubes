@@ -69,19 +69,47 @@ exports.getTubes = async (req, res, next) => {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
-    let tubes = [];
-    for (const tubeId of team.tubes) {
-      const tube = await Tube.findOne({
-        _id: tubeId,
-        users: new ObjectId(_id),
-      });
+    const tubes = await Tube.find({
+      team: teamId,
+      users: new ObjectId(_id),
+    });
     
-      if (tube !== null) {
-        tubes.push(tube);
-      }
-    }
-    res.json({ tubes });
+       res.json({ tubes });
   } catch (error) {
     res.status(500).json({ message: "server error" });
   }
 };
+
+exports.getTubeDetails = async (req, res, next) => {
+  const { tubeId } = req.params;
+   const { _id } = req.body;
+  try {
+    const tube = await Tube.findById(tubeId);
+    if (!tube) {
+      res.status(404).json({ message: "tube was not found" });
+      return;
+    }
+    const tubeUser = tube.users.find((userId) => userId.toString() === _id);
+    if (!tubeUser) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+    res.json({
+      tube: tube,
+      isTubeManager: (tube.admin.toString() === _id),
+      progress: calculateProgress(tube.currentScore,tube.totalScore)
+    });
+
+  } catch (error) {
+     res.status(500).json({ message: "server error" });
+  }
+
+  
+}
+
+const calculateProgress = (currentScore, totalScore) => {
+  if (totalScore === 0) {
+    return 0;
+  }
+  return (currentScore / totalScore)* 100;
+}

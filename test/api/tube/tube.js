@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const request = require("supertest");
 
 const { assert, expect: chaiExpect } = require("chai");
+const { getTubeDetails } = require("../../../controllers/tube");
 
 describe("tubes", () => {
   let jwt, teamId, jwt2, jwt3, tubeId;
@@ -158,5 +159,40 @@ describe("tubes", () => {
           chaiExpect(res.body).to.not.have.property("tubes");
         });
     });
+    it("get Tube Details with tube Manager", () => {
+        return request(app)
+          .get("/tubes/" + tubeId)
+          .set("Authorization", "Bearer " + jwt2)
+          .expect(200)
+          .then((res) => {
+            chaiExpect(res.body).to.have.property("tube");
+            chaiExpect(res.body).to.have.property("progress");
+            chaiExpect(res.body).to.have.property("isTubeManager", true);
+          });
+    })
+
+      it("get Tube Details with tube Manager", () => {
+        return request(app)
+          .get("/tubes/" + tubeId)
+          .set("Authorization", "Bearer " + jwt2)
+          .expect(200)
+          .then((res) => {
+            chaiExpect(res.body).to.have.property("tube");
+            chaiExpect(res.body).to.have.property("progress");
+            chaiExpect(res.body).to.have.property("isTubeManager", true);
+          });
+      });
+    
+      it("get Tube failed, user is not part of tube", () => {
+        return request(app)
+          .get("/tubes/" + tubeId)
+          .set("Authorization", "Bearer " + jwt3)
+          .expect(401)
+          .then((res) => {
+            chaiExpect(res.body).to.have.not.property("tube");
+            chaiExpect(res.body).to.have.not.property("progress");
+            chaiExpect(res.body).to.have.not.property("isTubeManager");
+          });
+      });
   });
 });

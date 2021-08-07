@@ -28,4 +28,6 @@ router.get(
   controller.getTubes
 );
 
+router.get("/:tubeId", isAuth, controller.getTubeDetails);
+
 module.exports = router;
