@@ -77,39 +77,42 @@ exports.signup = (req, res, next) => {
 
 exports.login = (req, res, next) => {
   handleErrors(req, res, next, 403);
-  const { email, password } = req.body;
-  let user;
-  User.findOne({ email: email })
-    .then((result) => {
-      if (result) {
-        user = result;
-        return bcrypt.compare(password, user.password);
-      }
-      throw new Error("Login Failed");
-    })
-    .then((result) => {
-      if (result) {
-        const token = jwt.sign(
-          {
-            email: user.email,
-            userId: user._id.toString(),
-          },
-          "somekeyfromivtech",
-          { expiresIn: "365d" }
-        );
-        res.json({ message: "Login succeus", user: user, jwt: token });
-        return;
-      }
-      res.status(403).json({ message: "incorrect password or email" });
-    })
-    .catch((error) => {
-      res.status(500).json({
-        message: "Login Failed",
+
+    const { email, password } = req.body;
+    let user;
+    User.findOne({ email: email })
+      .then((result) => {
+        if (result) {
+          user = result;
+          return bcrypt.compare(password, user.password);
+        }
+        throw new Error("Login Failed");
+      })
+      .then((result) => {
+        if (result) {
+          const token = jwt.sign(
+            {
+              email: user.email,
+              userId: user._id.toString(),
+            },
+            "somekeyfromivtech",
+            { expiresIn: "365d" }
+          );
+          res.json({ message: "Login succeus", user: user, jwt: token });
+          return;
+        }
+        res.status(403).json({ message: "incorrect password or email" });
+      })
+      .catch((error) => {
+        res.status(500).json({
+          message: "Login Failed",
+        });
       });
-    });
+
 };
 
 exports.updateUser = async (req, res, next) => {
+  try{
   handleErrors(req, res, next, 400);
   const {
     _id,
@@ -155,6 +158,10 @@ exports.updateUser = async (req, res, next) => {
       res.status(500).json({ message: "user is not updated" });
       return;
     });
+}
+  catch (error) {
+    next(error, req, res);
+  }
 };
 exports.getUserData = (req, res, next) => {
   handleErrors(req, res, next, 401);
