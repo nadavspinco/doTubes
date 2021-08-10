@@ -11,26 +11,30 @@ const { body } = require("express-validator");
 router.post(
   "/",
   [
-    body("type")
-      .custom((value, { req }) => {
-        const types = ["ux", "ui", "aws", "git", "fixing bugs"];
-        return types.includes(value);
-      }),
+    body("type").custom((value, { req }) => {
+      const types = ["ux", "ui", "aws", "git", "fixing bugs"];
+      return types.includes(value);
+    }),
     body("score").isDecimal({ min: 10, max: 100 }),
     body("name").trim().not().isEmpty(),
     body("tubeId").trim().not().isEmpty(),
-    body("userId").trim().not().isEmpty()
+    body("userId").trim().not().isEmpty(),
   ],
   isAuth,
   controller.addTask
 );
 
-module.exports = router;
+router.put(
+  "/",
+  [
+    body("status").custom((value, { req }) => {
+      const types = ["pending", "pre-estimated", "in-process", "completed"];
+      return types.includes(value);
+    }),
+    body("taskId").trim().not().isEmpty(),
+  ],
+  isAuth,
+  controller.changeTaskStatus
+);
 
-    // body("type").custom((value, { req }) => {
-    //   const types = ["ux", "ui", "aws", "git", "fixing bugs"];
-    //   if (!types.includes(value)) {
-    //     console.log("faild");
-    //     return Promise.reject("type should be: ux/ui/aws/git/fixing bugs");
-    //   }
-    // });
+module.exports = router;
