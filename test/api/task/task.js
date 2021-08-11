@@ -210,4 +210,40 @@ describe("tasks", () => {
         });
     });
   });
+  describe("get tasks", () => {
+    it("get tasks with valid jwt and tubeId", () => {
+      return request(app)
+        .get("/tasks/" + tubeId)
+        .set("Authorization", "Bearer " + jwt)
+
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("tasks");
+        });
+  
+    });
+    
+     it("get tasks with invalid jwt and  valid tubeId", () => {
+       return request(app)
+         .get("/tasks/" + tubeId)
+         .set("Authorization", "Bearer " + jwt2)
+
+         .expect(403)
+         .then((res) => {
+           chaiExpect(res.body).to.have.not.property("tasks");
+         });
+     });
+    
+    it("get tasks with valid jwt and invalid tubeId", () => {
+      
+       return request(app)
+         .get("/tasks/" + tubeId.substr(12) + "A")
+         .set("Authorization", "Bearer " + jwt)
+
+         .expect(404)
+         .then((res) => {
+           chaiExpect(res.body).to.not.have.property("tasks");
+         });
+     });
+  });
 });

@@ -5,7 +5,7 @@ const request = require("supertest");
 
 const { assert, expect: chaiExpect } = require("chai");
 
-describe("auth", () => {
+describe("teams", () => {
     let jwt, teamId, jwt2,jwt3,userId;
     before(() => {
         const uri = "mongodb://localhost:27017/doTubes";
