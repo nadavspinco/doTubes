@@ -159,3 +159,40 @@ const updateStatus = async (task, newStatus, estimatedTime) => {
 
   return await task.save();
 };
+
+
+exports.getUserTasksByTube = (req, res, next) => {
+  const { user, _id } = req.body;
+  const { tubeId } = req.params;
+  let tubeCheck;
+  try {
+     tubeCheck = new ObjectId(tubeId);
+  
+  } catch (error) { res.status(404).json({ message: "tube was not found" }); return;}
+
+
+  Tube.findById(tubeId).then(tube => {
+    if (!tube) {
+      res.status(404).json({ message: "tube was not found" });
+      return;
+    };
+    if (!tube.users.includes(new ObjectId(_id))) {
+      res.status(403).json({ message: "user is not part of this tube" });
+      return;
+    }
+    Task.find({ tube: new ObjectId(tubeId), exacutor: user._id }).then((tasks) => {
+      if (!tasks) {
+        res.status(500).json({ message: "server error" });
+        return;
+      }
+      res.json({ tasks });
+    }).catch(error => {
+      console.log(error);
+      res.status(500).json({ message: "server error" });
+      return;
+    })
+  }).catch(error => {
+    res.status(400).json({ message: "invalid tube Id" });
+  })
+
+}

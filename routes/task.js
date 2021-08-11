@@ -37,4 +37,6 @@ router.put(
   controller.changeTaskStatus
 );
 
+router.get("/:tubeId", isAuth, controller.getUserTasksByTube);
+
 module.exports = router;
