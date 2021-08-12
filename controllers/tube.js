@@ -5,6 +5,7 @@ const User = require("../models/user.js");
 const ObjectId = require("mongodb").ObjectId;
 
 const Tube = require("../models/tube.js");
+
 const { handleErrors } = require("./error.js");
 
 exports.addTube = async (req, res, next) => {
@@ -105,22 +106,64 @@ exports.getTubeDetails = async (req, res, next) => {
       }
       res.json({
         tube: tube,
-        isTubeManager: (tube.admin.toString() === _id),
-        progress: calculateProgress(tube.currentScore, tube.totalScore)
+        isTubeManager: tube.admin.toString() === _id,
+        progress: calculateProgress(tube.currentScore, tube.totalScore),
       });
-
     } catch (error) {
       res.status(500).json({ message: "server error" });
     }
-  }catch(error) {
+  } catch (error) {
     next(error, req, res);
   }
-  
-}
+};
+
+exports.addUser = (req, res, next) => {
+  handleErrors(req, res, next, 400);
+  const { tubeId, userId, user } = req.body;
+  User.findById(userId)
+    .then((userToAdd) => {
+      if (!userToAdd) {
+        res.status(404).json({ message: "user wans't not found" });
+        return;
+      }
+
+      Tube.findById(tubeId).then((tube) => {
+        if (!tube) {
+          res.status(404).json({ message: "tube wans't not found" });
+          return;
+        }
+        if (!userToAdd.teams.includes(tube.team)) {
+          res.status(403).json({ message: "user is not part of the team" });
+          return;
+        }
+        if (tube.admin.toString() !== user._id.toString()) {
+          res
+            .status(401)
+            .json({ message: "only admins are able to add users to the tube" });
+          return;
+        }
+        if (tube.users.includes(userToAdd._id)) {
+          res.status(400).json({ message: "user is already part of the tube" });
+          return;
+        }
+        tube.users.addToSet(userToAdd._id);
+        tube.save().then((result) => {
+          if (!result) {
+            res.status(500).json({ message: "unable to save the tube" });
+            return;
+          }
+          res.status(200).json({ message: "user added to the tube", tube });
+        });
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "server error" });
+    });
+};
 
 const calculateProgress = (currentScore, totalScore) => {
   if (totalScore === 0) {
     return 0;
   }
-  return (currentScore / totalScore)* 100;
-}
+  return (currentScore / totalScore) * 100;
+};
