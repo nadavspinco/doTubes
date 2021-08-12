@@ -7,7 +7,7 @@ const { assert, expect: chaiExpect } = require("chai");
 const { getTubeDetails } = require("../../../controllers/tube");
 
 describe("tubes", () => {
-  let jwt, teamId, jwt2, jwt3, tubeId;
+  let jwt, teamId, jwt2, jwt3, tubeId, userId, userId3;
   before(() => {
     const uri = "mongodb://localhost:27017/doTubes";
     return mongoose.connect(uri, {
@@ -34,6 +34,7 @@ describe("tubes", () => {
         })
         .then((res) => {
           jwt = res.body.jwt;
+          userId = res.body.userId;
         });
     });
     before(() => {
@@ -58,6 +59,7 @@ describe("tubes", () => {
         })
         .then((res) => {
           jwt3 = res.body.jwt;
+          userId3 = res.body.userId;
         });
     });
     before(() => {
@@ -124,8 +126,6 @@ describe("tubes", () => {
         })
         .expect(401);
     });
-
-    
   });
   describe("get tubes", () => {
     it("get tubes ,user is part of tubes", () => {
@@ -160,39 +160,110 @@ describe("tubes", () => {
         });
     });
     it("get Tube Details with tube Manager", () => {
-        return request(app)
-          .get("/tubes/" + tubeId)
-          .set("Authorization", "Bearer " + jwt2)
-          .expect(200)
-          .then((res) => {
-            chaiExpect(res.body).to.have.property("tube");
-            chaiExpect(res.body).to.have.property("progress");
-            chaiExpect(res.body).to.have.property("isTubeManager", true);
-          });
-    })
+      return request(app)
+        .get("/tubes/" + tubeId)
+        .set("Authorization", "Bearer " + jwt2)
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("tube");
+          chaiExpect(res.body).to.have.property("progress");
+          chaiExpect(res.body).to.have.property("isTubeManager", true);
+        });
+    });
 
-      it("get Tube Details with tube Manager", () => {
-        return request(app)
-          .get("/tubes/" + tubeId)
-          .set("Authorization", "Bearer " + jwt2)
-          .expect(200)
-          .then((res) => {
-            chaiExpect(res.body).to.have.property("tube");
-            chaiExpect(res.body).to.have.property("progress");
-            chaiExpect(res.body).to.have.property("isTubeManager", true);
-          });
-      });
-    
-      it("get Tube failed, user is not part of tube", () => {
-        return request(app)
-          .get("/tubes/" + tubeId)
-          .set("Authorization", "Bearer " + jwt3)
-          .expect(401)
-          .then((res) => {
-            chaiExpect(res.body).to.have.not.property("tube");
-            chaiExpect(res.body).to.have.not.property("progress");
-            chaiExpect(res.body).to.have.not.property("isTubeManager");
-          });
-      });
+    it("get Tube Details with tube Manager", () => {
+      return request(app)
+        .get("/tubes/" + tubeId)
+        .set("Authorization", "Bearer " + jwt2)
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("tube");
+          chaiExpect(res.body).to.have.property("progress");
+          chaiExpect(res.body).to.have.property("isTubeManager", true);
+        });
+    });
+
+    it("get Tube failed, user is not part of tube", () => {
+      return request(app)
+        .get("/tubes/" + tubeId)
+        .set("Authorization", "Bearer " + jwt3)
+        .expect(401)
+        .then((res) => {
+          chaiExpect(res.body).to.have.not.property("tube");
+          chaiExpect(res.body).to.have.not.property("progress");
+          chaiExpect(res.body).to.have.not.property("isTubeManager");
+        });
+    });
+  });
+  describe("add user to tube", () => {
+    it("add user failed ,user already in that tube", () => {
+      return request(app)
+        .put("/tubes/addUser")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          tubeId,
+          userId,
+        })
+        .expect(401)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("tube");
+        });
+    });
+    it("add user successful with valid user and tube", () => {
+      return request(app)
+        .put("/tubes/addUser")
+        .set("Authorization", "Bearer " + jwt2)
+        .send({
+          tubeId,
+          userId,
+        })
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("tube");
+          chaiExpect(res.body.tube).to.have.property("users");
+          chaiExpect(res.body.tube.users).to.have.contain(userId);
+        });
+    });
+
+    it("add user failed ,user already in that tube", () => {
+      return request(app)
+        .put("/tubes/addUser")
+        .set("Authorization", "Bearer " + jwt2)
+        .send({
+          tubeId,
+          userId,
+        })
+        .expect(400)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("tube");
+        });
+    });
+    it("add user failed ,user is not part of the team", () => {
+      return request(app)
+        .put("/tubes/addUser")
+        .set("Authorization", "Bearer " + jwt2)
+        .send({
+          tubeId,
+          userId: userId3,
+        })
+        .expect(403)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("tube");
+        });
+    });
+
+    it("add user failed, user jwt is not admin", () => {
+      return request(app)
+        .put("/tubes/addUser")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          tubeId,
+          userId,
+        })
+        .expect(401)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("tube");
+        });
+    });
   });
 });

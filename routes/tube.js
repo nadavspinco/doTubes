@@ -22,12 +22,18 @@ router.post(
   controller.addTube
 );
 
-router.get(
-  "/all/:teamId",
-  isAuth,
-  controller.getTubes
-);
+router.get("/all/:teamId", isAuth, controller.getTubes);
 
 router.get("/:tubeId", isAuth, controller.getTubeDetails);
+
+router.put(
+  "/addUser",
+  [
+    body("tubeId").trim().not().isEmpty(),
+    body("userId").trim().not().isEmpty(),
+  ],
+  isAuth,
+  controller.addUser
+);
 
 module.exports = router;
