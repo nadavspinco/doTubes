@@ -36,8 +36,10 @@ exports.addTask = async (req, res, next) => {
     task.exacutor = new ObjectId(userId);
     task
       .save()
-      .then((result) => {
+      .then(async (result) => {
         if (result) {
+          tube.totalScore += score;
+          await tube.save();
           res.status(201).json({
             message: "task added successfully",
             task: result,
