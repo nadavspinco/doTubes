@@ -28,7 +28,13 @@ router.put(
   "/",
   [
     body("status").custom((value, { req }) => {
-      const types = ["pending", "pre-estimated", "in-process", "completed"];
+      const types = [
+        "pending",
+        "pre-estimated",
+        "in-process",
+        "pre-report",
+        "completed",
+      ];
       return types.includes(value);
     }),
     body("taskId").trim().not().isEmpty(),
