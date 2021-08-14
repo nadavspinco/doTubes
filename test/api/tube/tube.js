@@ -172,7 +172,6 @@ describe("tubes", () => {
           chaiExpect(res.body).to.not.have.property("tubes");
         });
     });
-   
 
     it("get Tube Details with tube Manager", () => {
       return request(app)
@@ -185,8 +184,6 @@ describe("tubes", () => {
           chaiExpect(res.body).to.have.property("isTubeManager", true);
         });
     });
-
-  
 
     it("get Tube failed, user is not part of tube", () => {
       return request(app)
@@ -201,6 +198,28 @@ describe("tubes", () => {
     });
   });
   describe("add user to tube", () => {
+    describe("get user sugestions", () => {
+      it("get user suggestions faild , user is not tube admin", () => {
+        return request(app)
+          .get("/tubes//users-suggestions/" + tubeId)
+          .set("Authorization", "Bearer " + jwt)
+          .expect(401)
+          .then((res) => {
+            chaiExpect(res.body).to.not.have.property("users");
+          });
+      });
+
+      it("get user suggestions succeed  withe tube admin", () => {
+        return request(app)
+          .get("/tubes//users-suggestions/" + tubeId)
+          .set("Authorization", "Bearer " + jwt2)
+          .expect(200)
+          .then((res) => {
+            chaiExpect(res.body).to.have.property("users");
+            chaiExpect(res.body.users).to.have.lengthOf.above(0);
+          });
+      });
+    });
     it("add user failed ,user already in that tube", () => {
       return request(app)
         .put("/tubes/addUser")
@@ -214,6 +233,7 @@ describe("tubes", () => {
           chaiExpect(res.body).to.not.have.property("tube");
         });
     });
+
     it("add user successful with valid user and tube", () => {
       return request(app)
         .put("/tubes/addUser")

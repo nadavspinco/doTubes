@@ -26,6 +26,12 @@ router.get("/all/:teamId", isAuth, controller.getTubes);
 
 router.get("/:tubeId", isAuth, controller.getTubeDetails);
 
+router.get(
+  "/users-suggestions/:tubeId",
+  isAuth,
+  controller.getUsersSuggestions
+);
+
 router.put(
   "/addUser",
   [
