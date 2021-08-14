@@ -182,12 +182,22 @@ exports.getUserTasksByTube = (req, res, next) => {
         res.status(403).json({ message: "user is not part of this tube" });
         return;
       }
-      Task.find({ tube: new ObjectId(tubeId), exacutor: user._id })
+      Task.find({
+        tube: new ObjectId(tubeId),
+        exacutor:
+          tube.admin.toString() === user._id.toString() ? undefined : user._id,
+      })
         .then((tasks) => {
           if (!tasks) {
             res.status(500).json({ message: "server error" });
             return;
           }
+          tasks = tasks.map((task) => {
+            return {
+              task,
+              isMyTask: task.exacutor.toString() === user._id.toString(),
+            };
+          });
           res.json({ tasks });
         })
         .catch((error) => {
