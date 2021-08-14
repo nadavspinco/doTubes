@@ -8,6 +8,8 @@ const Tube = require("../models/tube.js");
 
 const { handleErrors } = require("./error.js");
 
+const Task = require("../models/task");
+
 exports.addTube = async (req, res, next) => {
   try {
     handleErrors(req, res, next, 400);
@@ -131,10 +133,25 @@ exports.getTubeDetails = async (req, res, next) => {
         res.status(401).json({ message: "Unauthorized" });
         return;
       }
-      res.json({
-        tube: tube,
-        isTubeManager: tube.admin.toString() === _id,
-        progress: calculateProgress(tube.currentScore, tube.totalScore),
+      Task.find({
+        tube: tubeId,
+        exacutor: tube.admin.toString() === _id ? undefined : user._id,
+      }).then(tasks => {
+        if (!tasks) {
+          res.status(500).json({ message: "server error" });
+          return;
+        }
+        res.json({
+          tube: tube,
+          isTubeManager: tube.admin.toString() === _id,
+          progress: calculateProgress(tube.currentScore, tube.totalScore),
+          totalCount: tasks.length,
+          doneCount: tasks
+            .filter((task) => {
+              return task.status === "completed";
+            })
+            .length,
+        });
       });
     } catch (error) {
       res.status(500).json({ message: "server error" });
