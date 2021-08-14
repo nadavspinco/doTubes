@@ -121,7 +121,7 @@ exports.getTubes = async (req, res, next) => {
 exports.getTubeDetails = async (req, res, next) => {
   try {
     const { tubeId } = req.params;
-    const { _id } = req.body;
+    const { _id,user } = req.body;
     try {
       const tube = await Tube.findById(tubeId);
       if (!tube) {
@@ -141,7 +141,14 @@ exports.getTubeDetails = async (req, res, next) => {
           res.status(500).json({ message: "server error" });
           return;
         }
+        tasks = tasks.map((task) => {
+          return {
+            task,
+            isMyTask: task.exacutor.toString() === user._id.toString(),
+          };
+        });
         res.json({
+          tasks,
           tube: tube,
           isTubeManager: tube.admin.toString() === _id,
           progress: calculateProgress(tube.currentScore, tube.totalScore),
