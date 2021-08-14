@@ -82,6 +82,17 @@ describe("tubes", () => {
           teamId: teamId,
         });
     });
+
+    before(() => {
+      return request(app)
+        .put("/tubes/addUser")
+        .set("Authorization", "Bearer " + jwt2)
+        .send({
+          tubeId,
+          userId,
+        });
+    });
+
     it("added tube to team failed, unauthorized user", () => {
       return request(app)
         .post("/tubes/")
@@ -135,17 +146,19 @@ describe("tubes", () => {
         .expect(200)
         .then((res) => {
           chaiExpect(res.body).to.have.property("tubes");
+          chaiExpect(res.body).to.have.property("isTeamAdmin", false);
           chaiExpect(res.body.tubes).to.have.lengthOf.above(0);
         });
     });
 
-    it("get tubes ,user is not part of any tubes", () => {
+    it("get tubes ,user is not part of any tubes and admin", () => {
       return request(app)
         .get("/tubes/all/" + teamId)
         .set("Authorization", "Bearer " + jwt)
         .expect(200)
         .then((res) => {
           chaiExpect(res.body).to.have.property("tubes");
+          chaiExpect(res.body).to.have.property("isTeamAdmin", true);
           chaiExpect(res.body.tubes).to.have.lengthOf(0);
         });
     });
@@ -159,17 +172,7 @@ describe("tubes", () => {
           chaiExpect(res.body).to.not.have.property("tubes");
         });
     });
-    it("get Tube Details with tube Manager", () => {
-      return request(app)
-        .get("/tubes/" + tubeId)
-        .set("Authorization", "Bearer " + jwt2)
-        .expect(200)
-        .then((res) => {
-          chaiExpect(res.body).to.have.property("tube");
-          chaiExpect(res.body).to.have.property("progress");
-          chaiExpect(res.body).to.have.property("isTubeManager", true);
-        });
-    });
+   
 
     it("get Tube Details with tube Manager", () => {
       return request(app)
@@ -182,6 +185,8 @@ describe("tubes", () => {
           chaiExpect(res.body).to.have.property("isTubeManager", true);
         });
     });
+
+  
 
     it("get Tube failed, user is not part of tube", () => {
       return request(app)
