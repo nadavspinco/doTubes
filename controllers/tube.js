@@ -79,8 +79,7 @@ exports.getTubes = async (req, res, next) => {
         team: teamId,
         users: new ObjectId(_id),
       });
-
-      res.json({ tubes });
+      res.json({ tubes, isTeamAdmin: team.admin.toString() === _id });
     } catch (error) {
       res.status(500).json({ message: "server error" });
     }
