@@ -60,6 +60,34 @@ exports.addTube = async (req, res, next) => {
   }
 };
 
+exports.getUsersSuggestions = (req, res, next) => {
+  const { tubeId } = req.params;
+  const { _id, user } = req.body;
+  Tube.findById(tubeId).then((tube) => {
+    if (!tube) {
+      res.status(404).json({ message: "tube was not find" });
+      return;
+    }
+    if (tube.admin.toString() !== _id) {
+      res.status(401).json({ message: "unauthorized" });
+      return;
+    }
+    User.find({ teams: tube.team })
+      .then((users) => {
+        if (!users) {
+          res.status(500).json({ message: "server error" });
+        }
+        users = users.filter((teamUser) => {
+          return !tube.users.includes(teamUser);
+        });
+        res.status(200).json({ users });
+      })
+      .catch((error) => {
+        res.status(500).json({ message: error.message });
+      });
+  });
+};
+
 exports.getTubes = async (req, res, next) => {
   try {
     const { teamId } = req.params;

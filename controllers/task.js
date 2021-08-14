@@ -78,18 +78,17 @@ exports.changeTaskStatus = (req, res, next) => {
         return;
       }
       if (!isValidStatus(task.status, status)) {
-        console.log("4")
         res.status(403).json({ message: "action is not allowed" });
         return;
       }
 
       if (
-        (task.status ===
-          "pre-estimated" && status === "in-progress" && date === NaN) ||
+        (task.status === "pre-estimated" &&
+          status === "in-progress" &&
+          date === NaN) ||
         date <= Date.now()
       ) {
-        res.
-          status(403).json({ message: "invalid time selection" });
+        res.status(403).json({ message: "invalid time selection" });
         return;
       }
       updateStatus(task, status, estimatedTime)
@@ -121,14 +120,14 @@ exports.changeTaskStatus = (req, res, next) => {
             return;
           }
           throw new Error("server error");
-        })
-    }).catch((error) => {
-          console.log(error);
-          res.status(500).json({ message: error.message });
-          return;
-        });;
-}
-
+        });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+      return;
+    });
+};
 
 const isValidStatus = (currentStatus, nextStatus) => {
   if (currentStatus === "pending" && nextStatus === "pre-estimated") {
@@ -162,39 +161,42 @@ const updateStatus = async (task, newStatus, estimatedTime) => {
   return await task.save();
 };
 
-
 exports.getUserTasksByTube = (req, res, next) => {
   const { user, _id } = req.body;
   const { tubeId } = req.params;
   let tubeCheck;
   try {
-     tubeCheck = new ObjectId(tubeId);
-  
-  } catch (error) { res.status(404).json({ message: "tube was not found" }); return;}
+    tubeCheck = new ObjectId(tubeId);
+  } catch (error) {
+    res.status(404).json({ message: "tube was not found" });
+    return;
+  }
 
-
-  Tube.findById(tubeId).then(tube => {
-    if (!tube) {
-      res.status(404).json({ message: "tube was not found" });
-      return;
-    };
-    if (!tube.users.includes(new ObjectId(_id))) {
-      res.status(403).json({ message: "user is not part of this tube" });
-      return;
-    }
-    Task.find({ tube: new ObjectId(tubeId), exacutor: user._id }).then((tasks) => {
-      if (!tasks) {
-        res.status(500).json({ message: "server error" });
+  Tube.findById(tubeId)
+    .then((tube) => {
+      if (!tube) {
+        res.status(404).json({ message: "tube was not found" });
         return;
       }
-      res.json({ tasks });
-    }).catch(error => {
-      console.log(error);
-      res.status(500).json({ message: "server error" });
-      return;
+      if (!tube.users.includes(new ObjectId(_id))) {
+        res.status(403).json({ message: "user is not part of this tube" });
+        return;
+      }
+      Task.find({ tube: new ObjectId(tubeId), exacutor: user._id })
+        .then((tasks) => {
+          if (!tasks) {
+            res.status(500).json({ message: "server error" });
+            return;
+          }
+          res.json({ tasks });
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(500).json({ message: "server error" });
+          return;
+        });
     })
-  }).catch(error => {
-    res.status(400).json({ message: "invalid tube Id" });
-  })
-
-}
+    .catch((error) => {
+      res.status(400).json({ message: "invalid tube Id" });
+    });
+};
