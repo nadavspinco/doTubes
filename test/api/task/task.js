@@ -174,6 +174,24 @@ describe("tasks", () => {
           chaiExpect(res.body.task).to.not.have.property("endDateTime");
         });
     });
+
+    it("change status of task from preEstimted to pre-report", () => {
+      return request(app)
+        .put("/tasks/")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          status: "pre-report",
+          taskId: taskId,
+        })
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("task");
+          chaiExpect(res.body.task).to.have.property("status", "pre-report");
+          chaiExpect(res.body.task).to.have.property("startDateTime");
+          chaiExpect(res.body.task).to.have.property("estimatedDateTime");
+          chaiExpect(res.body.task).to.not.have.property("endDateTime");
+        });
+    });
     it("change status of task from in-process to completed", () => {
       return request(app)
         .put("/tasks/")
@@ -220,30 +238,28 @@ describe("tasks", () => {
         .then((res) => {
           chaiExpect(res.body).to.have.property("tasks");
         });
-  
     });
-    
-     it("get tasks with invalid jwt and  valid tubeId", () => {
-       return request(app)
-         .get("/tasks/" + tubeId)
-         .set("Authorization", "Bearer " + jwt2)
 
-         .expect(403)
-         .then((res) => {
-           chaiExpect(res.body).to.have.not.property("tasks");
-         });
-     });
-    
+    it("get tasks with invalid jwt and  valid tubeId", () => {
+      return request(app)
+        .get("/tasks/" + tubeId)
+        .set("Authorization", "Bearer " + jwt2)
+
+        .expect(403)
+        .then((res) => {
+          chaiExpect(res.body).to.have.not.property("tasks");
+        });
+    });
+
     it("get tasks with valid jwt and invalid tubeId", () => {
-      
-       return request(app)
-         .get("/tasks/" + tubeId.substr(12) + "A")
-         .set("Authorization", "Bearer " + jwt)
+      return request(app)
+        .get("/tasks/" + tubeId.substr(12) + "A")
+        .set("Authorization", "Bearer " + jwt)
 
-         .expect(404)
-         .then((res) => {
-           chaiExpect(res.body).to.not.have.property("tasks");
-         });
-     });
+        .expect(404)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("tasks");
+        });
+    });
   });
 });

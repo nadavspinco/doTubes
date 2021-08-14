@@ -183,7 +183,7 @@ describe("tubes", () => {
           chaiExpect(res.body).to.have.property("progress");
           chaiExpect(res.body).to.have.property("isTubeManager", true);
           chaiExpect(res.body).to.have.property("doneCount");
-             chaiExpect(res.body).to.have.property("totalCount");
+          chaiExpect(res.body).to.have.property("totalCount");
         });
     });
 

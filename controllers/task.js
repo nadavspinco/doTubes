@@ -107,7 +107,7 @@ exports.changeTaskStatus = (req, res, next) => {
           if (chosenTask.status === "completed") {
             tube.currentScore += chosenTask.score;
           } else if (
-            chosenTask.status === "pre-estimated" &&
+            chosenTask.status === "in-process" &&
             prevStatus === "completed"
           ) {
             tube.currentScore -= chosenTask.score;
@@ -137,7 +137,10 @@ const isValidStatus = (currentStatus, nextStatus) => {
     return true;
   }
 
-  if (currentStatus === "in-process" && nextStatus === "completed") {
+  if (currentStatus === "in-process" && nextStatus === "pre-report") {
+    return true;
+  }
+  if (currentStatus === "pre-report" && nextStatus === "completed") {
     return true;
   }
   if (currentStatus === "completed" && nextStatus === "in-process") {
@@ -150,7 +153,7 @@ const updateStatus = async (task, newStatus, estimatedTime) => {
   if (newStatus === "in-process" && task.status === "pre-estimated") {
     task.startDateTime = new Date();
     task.estimatedDateTime = new Date(estimatedTime);
-  } else if (task.status === "in-process" && newStatus === "completed") {
+  } else if (task.status === "pre-report" && newStatus === "completed") {
     task.endDateTime = new Date();
   }
   if (task.status === "completed" && newStatus === "in-process") {
