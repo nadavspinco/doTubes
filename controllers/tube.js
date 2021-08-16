@@ -133,10 +133,11 @@ exports.getTubeDetails = async (req, res, next) => {
         res.status(401).json({ message: "Unauthorized" });
         return;
       }
-      Task.find({
-        tube: tube._id,
-        exacutor: tube.admin.toString() === _id ? undefined : user._id,
-      }).then((tasks) => {
+      const serachObject = { tube: tube._id };
+      if (tube.admin.toString() !== _id) {
+        serachObject.exacutor = user._id;
+      }
+      Task.find(serachObject).then((tasks) => {
         if (!tasks) {
           res.status(500).json({ message: "server error" });
           return;
