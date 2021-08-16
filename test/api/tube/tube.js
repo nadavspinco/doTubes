@@ -7,7 +7,7 @@ const { assert, expect: chaiExpect } = require("chai");
 const { getTubeDetails } = require("../../../controllers/tube");
 
 describe("tubes", () => {
-  let jwt, teamId, jwt2, jwt3, tubeId, userId, userId3;
+  let jwt, teamId, jwt2, jwt3, tubeId, userId, userId3, jwt4, userId4;
   before(() => {
     const uri = "mongodb://localhost:27017/doTubes";
     return mongoose.connect(uri, {
@@ -64,6 +64,19 @@ describe("tubes", () => {
     });
     before(() => {
       return request(app)
+        .post("/auth/signup")
+        .send({
+          email: "user4@walla.com",
+          fullName: "avi c",
+          password: "123456Aa!",
+        })
+        .then((res) => {
+          jwt4 = res.body.jwt;
+          userId4 = res.body.userId;
+        });
+    });
+    before(() => {
+      return request(app)
         .post("/teams/")
         .set("Authorization", "Bearer " + jwt)
         .send({
@@ -77,6 +90,15 @@ describe("tubes", () => {
       return request(app)
         .post("/teams/join")
         .set("Authorization", "Bearer " + jwt2)
+        .send({
+          name: "my tube",
+          teamId: teamId,
+        });
+    });
+    before(() => {
+      return request(app)
+        .post("/teams/join")
+        .set("Authorization", "Bearer " + jwt4)
         .send({
           name: "my tube",
           teamId: teamId,
