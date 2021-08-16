@@ -84,6 +84,7 @@ describe("tasks", () => {
           type: "ux",
           score: 10,
           userId: userId,
+          description: "description"
         })
         .expect(201)
         .then((res) => {
@@ -103,6 +104,7 @@ describe("tasks", () => {
           type: "ux",
           score: 10,
           userId: userId2,
+          description: "description",
         })
         .expect(401)
         .then((res) => {
@@ -120,6 +122,7 @@ describe("tasks", () => {
           type: "ux",
           score: 10,
           userId: userId,
+          description: "description",
         })
         .expect(401)
         .then((res) => {
