@@ -40,6 +40,7 @@ exports.addTask = async (req, res, next) => {
       .then(async (result) => {
         if (result) {
           tube.totalScore += score;
+          tube.tasks.addToSet(task);
           await tube.save();
           res.status(201).json({
             message: "task added successfully",

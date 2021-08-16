@@ -134,7 +134,7 @@ exports.getTubeDetails = async (req, res, next) => {
         return;
       }
       Task.find({
-        tube: tubeId,
+        tube: tube._id,
         exacutor: tube.admin.toString() === _id ? undefined : user._id,
       }).then((tasks) => {
         if (!tasks) {
