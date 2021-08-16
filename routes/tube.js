@@ -42,4 +42,6 @@ router.put(
   controller.addUser
 );
 
+router.get("/users/:tubeId", isAuth, controller.getTubeUsers);
+
 module.exports = router;

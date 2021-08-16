@@ -210,6 +210,35 @@ exports.addUser = (req, res, next) => {
     });
 };
 
+exports.getTubeUsers = (req, res, next) => {
+  const { _id, user } = req.body;
+  const { tubeId } = req.params;
+  try {
+    const tubeObjectId = new ObjectId(tubeId);
+  } catch (error) {
+    res.status(400).json({ message: "invalid tube id" });
+  }
+  Tube.findById(tubeId)
+    .populate("users")
+    .then((tube) => {
+      if (!tube) {
+        res.status(404).json({ message: "tube wasn't found" });
+        return;
+      }
+      const tubeUserResult = tube.users.find((tubeUser) => {
+        return tubeUser._id.toString() === _id;
+      });
+      if (!tubeUserResult) {
+        res.status(401).json({ message: "user is not part of this tube" });
+        return;
+      }
+      res.json({ users: tube.users });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "server error" });
+    });
+};
+
 const calculateProgress = (currentScore, totalScore) => {
   if (totalScore === 0) {
     return 0;

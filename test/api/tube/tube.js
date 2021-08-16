@@ -244,6 +244,7 @@ describe("tubes", () => {
           });
       });
     });
+
     it("add user failed ,user already in that tube", () => {
       return request(app)
         .put("/tubes/addUser")
@@ -313,6 +314,28 @@ describe("tubes", () => {
         .then((res) => {
           chaiExpect(res.body).to.not.have.property("tube");
         });
+    });
+  });
+  describe("get users by tube", () => {
+    it("get tube succeed", () => {
+      return request(app)
+        .get("/tubes/users/" + tubeId)
+        .set("Authorization", "Bearer " + jwt)
+        .expect(200)
+        .then((res) => {
+          chaiExpect(res.body).to.have.property("users");
+          chaiExpect(res.body.users).to.have.lengthOf.above(1);
+        });
+    });
+      it("get tube failed, user is not part of the tube", () => {
+        return request(app)
+          .get("/tubes/users/" + tubeId)
+          .set("Authorization", "Bearer " + jwt4)
+          .expect(401)
+          .then((res) => {
+            chaiExpect(res.body).to.not.have.property("users");
+          });
+
     });
   });
 });
