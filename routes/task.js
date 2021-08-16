@@ -19,6 +19,7 @@ router.post(
     body("name").trim().not().isEmpty(),
     body("tubeId").trim().not().isEmpty(),
     body("userId").trim().not().isEmpty(),
+    body("description").trim().not().isEmpty(),
   ],
   isAuth,
   controller.addTask
