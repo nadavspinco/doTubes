@@ -61,7 +61,7 @@ exports.addTask = async (req, res, next) => {
 
 exports.changeTaskStatus = (req, res, next) => {
   handleErrors(req, res, next, 400);
-  const { taskId, status, user, _id, estimatedTime } = req.body;
+  const { taskId, status, user, _id, estimatedTime, feedback } = req.body;
   let tube, prevStatus, chosenTask, date;
   date = Date.parse(estimatedTime);
   Task.findById(taskId)
@@ -91,6 +91,14 @@ exports.changeTaskStatus = (req, res, next) => {
         date <= Date.now()
       ) {
         res.status(403).json({ message: "invalid time selection" });
+        return;
+      }
+      if (
+        (task.status === "pre-report" &&
+          status === "completed" &&
+          feedback === undefined) 
+      ) {
+        res.status(403).json({ message: "feedback must be provided" });
         return;
       }
       updateStatus(task, status, estimatedTime)
@@ -160,6 +168,7 @@ const updateStatus = async (task, newStatus, estimatedTime) => {
   }
   if (task.status === "completed" && newStatus === "in-process") {
     task.endDateTime = undefined;
+    task.feedback = undefined;
   }
   task.status = newStatus;
 
