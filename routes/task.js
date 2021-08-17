@@ -39,6 +39,9 @@ router.put(
       return types.includes(value);
     }),
     body("taskId").trim().not().isEmpty(),
+    body("feedback").custom((value, { req }) => {
+      return value === undefined || (value >=1 && value <=10)
+    }),
   ],
   isAuth,
   controller.changeTaskStatus

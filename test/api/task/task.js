@@ -195,13 +195,29 @@ describe("tasks", () => {
           chaiExpect(res.body.task).to.not.have.property("endDateTime");
         });
     });
-    it("change status of task from in-process to completed", () => {
+
+    it("change status of task from pre-report to completed falied, no feedback", () => {
       return request(app)
         .put("/tasks/")
         .set("Authorization", "Bearer " + jwt)
         .send({
           status: "completed",
           taskId: taskId,
+        })
+        .expect(403)
+        .then((res) => {
+          chaiExpect(res.body).to.not.have.property("task");
+ 
+        });
+    });
+    it("change status of task from pre-report to completed", () => {
+      return request(app)
+        .put("/tasks/")
+        .set("Authorization", "Bearer " + jwt)
+        .send({
+          status: "completed",
+          taskId: taskId,
+          feedback: 5,
         })
         .expect(200)
         .then((res) => {
@@ -228,6 +244,7 @@ describe("tasks", () => {
           chaiExpect(res.body.task).to.have.property("startDateTime");
           chaiExpect(res.body.task).to.have.property("estimatedDateTime");
           chaiExpect(res.body.task).to.not.have.property("endDateTime");
+          chaiExpect(res.body.task).to.not.have.property("feedback");
         });
     });
   });

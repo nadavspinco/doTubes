@@ -52,6 +52,11 @@ const taskSchema = new Schema(
     estimatedDateTime: {
       type: Date,
     },
+    feedback: {
+      type: Number,
+      min: 1,
+      max: 10
+    }
   },
   { timestamps: true }
 );
