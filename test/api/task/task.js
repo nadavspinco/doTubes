@@ -82,7 +82,7 @@ describe("tasks", () => {
           name: "my tube",
           tubeId: tubeId,
           type: "ux",
-          score: 10,
+          score: "10",
           userId: userId,
           description: "description"
         })

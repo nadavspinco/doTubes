@@ -15,7 +15,7 @@ router.post(
       const types = ["ux", "ui", "aws", "git", "fixing bugs"];
       return types.includes(value);
     }),
-    body("score").isDecimal({ min: 10, max: 100 }),
+    body("score").isNumeric({ min: 10, max: 100 }),
     body("name").trim().not().isEmpty(),
     body("tubeId").trim().not().isEmpty(),
     body("userId").trim().not().isEmpty(),
