@@ -101,7 +101,7 @@ exports.changeTaskStatus = (req, res, next) => {
         res.status(403).json({ message: "feedback must be provided" });
         return;
       }
-      updateStatus(task, status, estimatedTime)
+      updateStatus(task, status, estimatedTime,feedback)
         .then((result) => {
           if (!result) {
             res.status(500).json({ message: "unable to save the task" });
@@ -159,12 +159,13 @@ const isValidStatus = (currentStatus, nextStatus) => {
   return false;
 };
 
-const updateStatus = async (task, newStatus, estimatedTime) => {
+const updateStatus = async (task, newStatus, estimatedTime,feedback) => {
   if (newStatus === "in-process" && task.status === "pre-estimated") {
     task.startDateTime = new Date();
     task.estimatedDateTime = new Date(estimatedTime);
   } else if (task.status === "pre-report" && newStatus === "completed") {
     task.endDateTime = new Date();
+    task.feedback = feedback;
   }
   if (task.status === "completed" && newStatus === "in-process") {
     task.endDateTime = undefined;

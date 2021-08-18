@@ -217,7 +217,7 @@ describe("tasks", () => {
         .send({
           status: "completed",
           taskId: taskId,
-          feedback: 5,
+          feedback : 5
         })
         .expect(200)
         .then((res) => {
@@ -226,6 +226,7 @@ describe("tasks", () => {
           chaiExpect(res.body.task).to.have.property("startDateTime");
           chaiExpect(res.body.task).to.have.property("estimatedDateTime");
           chaiExpect(res.body.task).to.have.property("endDateTime");
+          chaiExpect(res.body.task).to.have.property("feedback",5);
         });
     });
 
