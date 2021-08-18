@@ -154,8 +154,8 @@ exports.getTubeDetails = async (req, res, next) => {
           isTubeManager: tube.admin.toString() === _id,
           progress: calculateProgress(tube.currentScore, tube.totalScore),
           totalCount: tasks.length,
-          doneCount: tasks.filter((task) => {
-            return task.status === "completed";
+          doneCount: tasks.filter((taskObj) => {
+            return taskObj.task.status === "completed"; 
           }).length,
         });
       });
