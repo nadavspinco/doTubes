@@ -137,29 +137,32 @@ exports.getTubeDetails = async (req, res, next) => {
       if (tube.admin.toString() !== _id) {
         serachObject.exacutor = user._id;
       }
-      Task.find(serachObject).then((tasks) => {
-        if (!tasks) {
-          res.status(500).json({ message: "server error" });
-          return;
-        }
-        tasks = tasks.map((task) => {
-          return {
-            task,
-            isMyTask: task.exacutor.toString() === user._id.toString(),
-          };
+      Task.find(serachObject)
+        .populate("exacutor")
+        .then((tasks) => {
+          if (!tasks) {
+            res.status(500).json({ message: "server error" });
+            return;
+          }
+          tasks = tasks.map((task) => {
+            return {
+              task,
+              isMyTask: task.exacutor._id.toString() === user._id.toString(),
+            };
+          });
+          res.json({
+            tasks,
+            tube: tube,
+            isTubeManager: tube.admin.toString() === _id,
+            progress: calculateProgress(tube.currentScore, tube.totalScore),
+            totalCount: tasks.length,
+            doneCount: tasks.filter((taskObj) => {
+              return taskObj.task.status === "completed";
+            }).length,
+          });
         });
-        res.json({
-          tasks,
-          tube: tube,
-          isTubeManager: tube.admin.toString() === _id,
-          progress: calculateProgress(tube.currentScore, tube.totalScore),
-          totalCount: tasks.length,
-          doneCount: tasks.filter((taskObj) => {
-            return taskObj.task.status === "completed"; 
-          }).length,
-        });
-      });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "server error" });
     }
   } catch (error) {
