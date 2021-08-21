@@ -4,6 +4,8 @@ const router = express.Router();
 
 const controller = require("../controllers/team");
 
+const analyticsRoutes =  require('./analytics')
+
 const isAuth = require("../middleware/is-Auth");
 
 const { body } = require("express-validator");
@@ -21,6 +23,12 @@ router.post(
   isAuth,
   controller.joinTeam
 );
+
+
+
+router.get("/getTeamByPermissions", isAuth, controller.getTeamByPermissions);
+
+router.use("/analytics", analyticsRoutes);
 
 router.get("/:teamId", isAuth, controller.getTeamDeatils);
 
