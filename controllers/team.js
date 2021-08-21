@@ -10,6 +10,8 @@ const ObjectId = require("mongodb").ObjectId;
 
 const { validationResult } = require("express-validator");
 
+
+
 exports.addTeam = (req, res, next) => {
   handleErrors(req, res, next, 400);
   const { teamName, _id, user } = req.body;
@@ -122,6 +124,7 @@ exports.getTeamDeatils = async (req, res, next) => {
   }
 };
 
+
 exports.getTeams = async (req, res, next) => {
   const { user } = req.body;
   try {
@@ -136,3 +139,29 @@ exports.getTeams = async (req, res, next) => {
     return;
   }
 };
+
+exports.getTeamByPermissions = (req, res, next) => {
+  const { user, _id } = req.body;
+  Team.find({ _id: { $in: user.teams } })
+    .populate("users")
+    .then((teams) => {
+      if (!teams) {
+        res.status(404).json({ message: "no team was found" });
+        return;
+      }
+      const resTeamsObj = teams.map((team) => {
+        if (team.admin._id.toString() === _id) {
+          return team;
+        }
+        team.users = [user];
+        return team;
+      });
+      res.json({ teams, resTeamsObj });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ message: "server error" });
+    })
+};
+
+

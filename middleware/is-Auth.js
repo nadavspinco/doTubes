@@ -31,6 +31,7 @@ module.exports = async (req, res, next) => {
       handleUnauthorizedRequest(new Error("invalid token user not in db"), next);
     }
   } catch (error) {
+    console.log(error);
     next(error);
   }
   next();
