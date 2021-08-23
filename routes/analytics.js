@@ -41,5 +41,6 @@ router.get(
   isAuth,
   controller.getFeedbackByTypes
 );
+router.get("/all/:teamId/:userId?", isAuth, controller.getAllAnalytics);
 
 module.exports = router;
