@@ -28,7 +28,7 @@ const months = [
   "Dec",
 ];
 
-const getAnalytics = (
+const getAllAnalytics = (
   req,
   res,
   next,
@@ -90,6 +90,121 @@ const getAnalytics = (
       console.log(error);
       res.json({ message: error.message });
     });
+};
+
+exports.getAllAnalytics = (req, res, next) => {
+  const { _id, user } = req.body;
+  const { teamId, userId } = req.params;
+  if (!teamId) {
+    res.status(400).json({ message: "team id is missing" });
+    return;
+  }
+  if (!isValidMongoId(teamId)) {
+    res.status(400).json({ message: "team id is invalid" });
+    return;
+  }
+  Team.findById(teamId).then((team) => {
+    if (!team) {
+      res.status(404).json({ message: "team was not found" });
+      return;
+    }
+    if (!team.users.includes(user._id)) {
+      res.status(401).json({ message: "user is not part of this team" });
+      return;
+    }
+
+    if (
+      (userId === undefined && team.admin.toString() !== user._id.toString()) ||
+      (team.admin.toString() !== user._id.toString() &&
+        userId !== user._id.toString())
+    ) {
+      res
+        .status(401)
+        .json({ message: "only admin can get the team analytics" });
+      return;
+    }
+
+    const searchObject = {
+      tube: { $in: team.tubes },
+      status: "completed",
+    };
+    if (userId) {
+      searchObject.exacutor = new ObjectId(userId);
+    }
+    Task.find(searchObject)
+      .then((tasks) => {
+        if (!tasks) {
+          res.json({ message: "there is no available data" });
+          return;
+        }
+        res.json(getAllAnalyticsToObject(tasks));
+      })
+      .catch((error) => {
+        console.log(error);
+        res.json({ message: error.message });
+      });
+  });
+};
+
+const getAllAnalyticsToObject = (tasks) => {
+  const tasksByTypes = analzyeData(
+    tasks,
+    buildDictionaryByLastYear,
+    (task) => {
+      return task.type;
+    },
+    calclateTypesResObject
+  );
+  const estimtedTimeByMonth = analzyeData(
+    tasks,
+    buildDictionaryByLastYearByMonthes,
+    (task) => {
+      return months[task.endDateTime.getMonth()];
+    },
+    calculateEstimations
+  );
+
+  const feedbackByMonth = analzyeData(
+    tasks,
+    buildDictionaryByLastYearByMonthes,
+    (task) => {
+      return months[task.endDateTime.getMonth()];
+    },
+    calculateFeedback
+  );
+  const feedbackByType = analzyeData(
+    tasks,
+    buildDictionaryByLastYear,
+    (task) => {
+      return task.type;
+    },
+    calculateFeedback
+  );
+  const estimtedTimeByTypes = analzyeData(
+    tasks,
+    buildDictionaryByLastYear,
+    (task) => {
+      return task.type;
+    },
+    calculateEstimations
+  );
+
+  const scoreByMonth = analzyeData(
+    tasks,
+    buildDictionaryByLastYearByMonthes,
+    (task) => {
+      return months[task.endDateTime.getMonth()];
+    },
+    calculateScore
+  );
+  return {
+    tasksByTypes,
+    estimtedTimeByMonth,
+    feedbackByMonth,
+    feedbackByType,
+    estimtedTimeByTypes,
+    scoreByMonth,
+  };
 };
 
 exports.getTaskstypeByTeam = (req, res, next) => {
@@ -155,7 +270,7 @@ const buildDictionaryByLastYearByMonthes = (tasks, taskStratagy) => {
     0,
     0
   );
-  console.log(currentTime.getMonth());
+
   for (let i = 0; i < 12; i++) {
     dictionary[months[(lastYear.getMonth() + i) % 12]] = [];
   }
