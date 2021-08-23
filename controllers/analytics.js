@@ -10,14 +10,34 @@ const ObjectId = require("mongodb").ObjectId;
 
 const mongoose = require("mongoose");
 
-const { isValidMongoId } = require('../utils/validation');
+const { isValidMongoId } = require("../utils/validation");
 const task = require("../models/task");
 
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
-const getAnalytics = (req, res, next, buildDictionary, taskStratagy, makeResObject) => {
+const getAnalytics = (
+  req,
+  res,
+  next,
+  buildDictionary,
+  taskStratagy,
+  makeResObject
+) => {
   const { _id, user } = req.body;
-  const { teamId } = req.params;
+  const { teamId, userId } = req.params;
   if (!teamId) {
     res.status(400).json({ message: "team id is missing" });
     return;
@@ -34,12 +54,29 @@ const getAnalytics = (req, res, next, buildDictionary, taskStratagy, makeResObje
       }
       if (!team.users.includes(user._id)) {
         res.status(401).json({ message: "user is not part of this team" });
+        return;
       }
-      Task.find({
+
+      if (
+        (userId === undefined &&
+          team.admin.toString() !== user._id.toString()) ||
+        (team.admin.toString() !== user._id.toString() &&
+          userId !== user._id.toString())
+      ) {
+        res
+          .status(401)
+          .json({ message: "only admin can get the team analytics" });
+        return;
+      }
+
+      const searchObject = {
         tube: { $in: team.tubes },
-        exacutor: user._id,
         status: "completed",
-      }).then((tasks) => {
+      };
+      if (userId) {
+        searchObject.exacutor = new ObjectId(userId);
+      }
+      Task.find(searchObject).then((tasks) => {
         if (!tasks) {
           res.json({ message: "there is no available data" });
           return;
@@ -49,9 +86,9 @@ const getAnalytics = (req, res, next, buildDictionary, taskStratagy, makeResObje
         );
       });
     })
-      .catch((error) => {
-          console.log(error);
-      res.json({ message: "server error" });
+    .catch((error) => {
+      console.log(error);
+      res.json({ message: error.message });
     });
 };
 
@@ -61,33 +98,32 @@ exports.getTaskstypeByTeam = (req, res, next) => {
     res,
     next,
     buildDictionaryByLastYear,
-    ((task) => {
+    (task) => {
       return task.type;
-    }),
+    },
     calclateTypesResObject
   );
-}
+};
 
-exports.getEstimtedTimeByMonth = (req, res, next) =>{
-    getAnalytics(
-      req,
-      res,
-      next,
-      buildDictionaryByLastYear,
-      (task) => {
-        return months[task.endDateTime.getMonth()];
-      },
-      calculateEstimations
-    );
-    
-}
+exports.getEstimtedTimeByMonth = (req, res, next) => {
+  getAnalytics(
+    req,
+    res,
+    next,
+    buildDictionaryByLastYearByMonthes,
+    (task) => {
+      return months[task.endDateTime.getMonth()];
+    },
+    calculateEstimations
+  );
+};
 
 exports.getFeedbackByMonth = (req, res, next) => {
   getAnalytics(
     req,
     res,
     next,
-    buildDictionaryByLastYear,
+    buildDictionaryByLastYearByMonthes,
     (task) => {
       return months[task.endDateTime.getMonth()];
     },
@@ -102,20 +138,41 @@ exports.getFeedbackByTypes = (req, res, next) => {
     next,
     buildDictionaryByLastYear,
     (task) => {
-         return task.type;;
+      return task.type;
     },
     calculateFeedback
   );
 };
 
-
-
-const buildDictionaryByLastYear = (tasks, taskStratagy) => {
-    dictionary = {};
+const buildDictionaryByLastYearByMonthes = (tasks, taskStratagy) => {
+  dictionary = {};
   const currentTime = new Date();
   const lastYear = new Date(
     currentTime.getFullYear() - 1,
-    (currentTime.getMonth() + 1) % 12,
+    (currentTime.getMonth() + 2) % 12,
+    0,
+    0,
+    0,
+    0
+  );
+  console.log(currentTime.getMonth());
+  for (let i = 0; i < 12; i++) {
+    dictionary[months[(lastYear.getMonth() + i) % 12]] = [];
+  }
+  for (const task of tasks) {
+    if (task.endDateTime.getTime() >= lastYear) {
+      dictionary[months[task.endDateTime.getMonth()]].push(task);
+    }
+  }
+  return dictionary;
+};
+
+const buildDictionaryByLastYear = (tasks, taskStratagy) => {
+  dictionary = {};
+  const currentTime = new Date();
+  const lastYear = new Date(
+    currentTime.getFullYear() - 1,
+    (currentTime.getMonth() + 2) % 12,
     0,
     0,
     0,
@@ -128,8 +185,8 @@ const buildDictionaryByLastYear = (tasks, taskStratagy) => {
       }
       dictionary[taskStratagy(task)].push(task);
     }
-    }
-    return dictionary;
+  }
+  return dictionary;
 };
 
 exports.getEstimtedTimeByTypes = (req, res, next) => {
@@ -138,21 +195,21 @@ exports.getEstimtedTimeByTypes = (req, res, next) => {
     res,
     next,
     buildDictionaryByLastYear,
-  ((task) => {
+    (task) => {
       return task.type;
-    }),
+    },
     calculateEstimations
   );
 };
 const analzyeData = (tasks, buildDictionary, taskStratagy, makeResObject) => {
-    dictionary = buildDictionary(tasks, taskStratagy);
-    return makeResObject(dictionary)
-}
+  dictionary = buildDictionary(tasks, taskStratagy);
+  return makeResObject(dictionary);
+};
 
 const calculateEstimations = (dictionary) => {
-    const labels = []
-    const estimated = []
-    const real =[]
+  const labels = [];
+  const estimated = [];
+  const real = [];
   for (key in dictionary) {
     labels.push(key);
     let realCount = 0;
@@ -164,23 +221,24 @@ const calculateEstimations = (dictionary) => {
       realCount +=
         (task.endDateTime.getTime() - task.startDateTime.getTime()) / 3600000;
     }
-    estimated.push(estimatedCount);
-    real.push(realCount);
+    estimated.push(estimatedCount.toFixed(2));
+    real.push(realCount.toFixed(2));
   }
   return { labels, estimated, real };
 };
 
-exports.getScoreByMonth = (req,res,next) => {
-    getAnalytics(
-        req,
-        res,
-        next,
-        buildDictionaryByLastYear,
-        ((task) => {
-            return months[task.endDateTime.getMonth()]
-        }),
-        calculateScore);
-}
+exports.getScoreByMonth = (req, res, next) => {
+  getAnalytics(
+    req,
+    res,
+    next,
+    buildDictionaryByLastYearByMonthes,
+    (task) => {
+      return months[task.endDateTime.getMonth()];
+    },
+    calculateScore
+  );
+};
 
 const calculateFeedback = (dictionary) => {
   const labels = [];
@@ -188,43 +246,44 @@ const calculateFeedback = (dictionary) => {
   for (key in dictionary) {
     let sum = 0,
       count = 0;
-      for (let task of dictionary[key]) {
+    for (let task of dictionary[key]) {
       sum += task.feedback;
       count++;
     }
     labels.push(key);
-    data.push((sum / count).toFixed(2));
+    if (count > 0) {
+      data.push((sum / count).toFixed(2));
+    } else {
+      data.push(0);
+    }
   }
   return { data, labels };
 };
 
-
-const calculateScore = (dictionary)=>{
-    const labels = [];
-    const data = [];
-    for (key in dictionary) {
-        let sum = 0, count = 0;
-        for (let task of dictionary[key]) {
-            sum += task.score;
-            count++;
-        }
-        labels.push(key);
-        data.push(sum);
+const calculateScore = (dictionary) => {
+  const labels = [];
+  const data = [];
+  for (key in dictionary) {
+    let sum = 0;
+    for (let task of dictionary[key]) {
+      sum += task.score;
     }
-    return { data, labels };
-}
-
+    labels.push(key);
+    data.push(sum);
+  }
+  return { data, labels };
+};
 
 const calclateTypesResObject = (dictionary) => {
-    let total = 0;
+  let total = 0;
   const labels = [];
-    const data = [];
-    for (key in dictionary) {
-        total+=dictionary[key].length;
-    }
-      for (key in dictionary) {
-        labels.push(key);
-        data.push(((dictionary[key].length / total) * 100).toFixed(2));
-      }
+  const data = [];
+  for (key in dictionary) {
+    total += dictionary[key].length;
+  }
+  for (key in dictionary) {
+    labels.push(key);
+    data.push(((dictionary[key].length / total) * 100).toFixed(2));
+  }
   return { data, labels };
 };

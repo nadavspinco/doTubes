@@ -2,35 +2,44 @@ const express = require("express");
 
 const router = express.Router();
 
-const controller = require('../controllers/analytics');
+const controller = require("../controllers/analytics");
 
 const isAuth = require("../middleware/is-Auth");
 
-router.get("/tasksType/:teamId", isAuth, controller.getTaskstypeByTeam);
+router.get(
+  "/tasksType/:teamId/:userId?",
+  isAuth,
+  controller.getTaskstypeByTeam
+);
 
 router.get(
-  "/timeEstimationByMonth/:teamId",
+  "/timeEstimationByMonth/:teamId/:userId?",
   isAuth,
   controller.getEstimtedTimeByMonth
 );
 
 router.get(
-  "/timeEstimationByType/:teamId",
+  "/timeEstimationByType/:teamId/:userId?",
   isAuth,
   controller.getEstimtedTimeByTypes
 );
 
-router.get("/scoreByMonth/:teamId",
-    isAuth,
-    controller.getScoreByMonth);
+router.get(
+  "/scoreByMonth/:teamId/:userId?",
+  isAuth,
+  controller.getScoreByMonth
+);
 
+router.get(
+  "/feedbackByMonth/:teamId/:userId?",
+  isAuth,
+  controller.getFeedbackByMonth
+);
 
-
-router.get("/feedbackByMonth/:teamId", isAuth, controller.getFeedbackByMonth);
-
-router.get("/feedbackByType/:teamId", isAuth, controller.getFeedbackByTypes);
-
-
-
+router.get(
+  "/feedbackByType/:teamId/:userId?",
+  isAuth,
+  controller.getFeedbackByTypes
+);
 
 module.exports = router;
