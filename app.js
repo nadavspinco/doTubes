@@ -1,5 +1,8 @@
 const express = require("express");
+const http = require("http");
+const socketio = require("socket.io");
 const mongoose = require("mongoose");
+
 const compression = require("compression");
 const helmet = require("helmet");
 const router = express.Router();
@@ -13,6 +16,10 @@ const cors = require("cors");
 var methodOverride = require("method-override");
 const NODE_ENV = process.env.NODE_ENV || "test";
 const app = express();
+const server = http.createServer(app);
+const  chat   = require('./chat/chatHandler');
+let io;
+const socketIoModule = require('./utils/io')
 
 app.use(cors()); // enable all cors request
 
@@ -32,6 +39,8 @@ app.use("/tasks", taskRouter);
 
 app.use(methodOverride());
 
+
+
 app.use(function (error, req, res, next) {
   let status = 500;
   if (error.statusCode) {
@@ -49,9 +58,12 @@ if (NODE_ENV !== "test") {
     .connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then((result) => {
       console.log("running app");
-      app.listen(process.env.PORT || 8080);
+      server.listen(process.env.PORT || 8080);
+     io =  socketIoModule.init(server);
+       io.on("connection", chat.chatHandler);
     })
     .catch((error) => console.log(error));
 }
-
-module.exports = app;
+module.exports = {
+  server,app
+};

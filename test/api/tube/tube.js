@@ -1,8 +1,7 @@
 const { signup } = require("../../../controllers/auth");
-const app = require("../../../app.js");
 const mongoose = require("mongoose");
 const request = require("supertest");
-
+const { app } = require("../../../app.js");
 const { assert, expect: chaiExpect } = require("chai");
 const { getTubeDetails } = require("../../../controllers/tube");
 
