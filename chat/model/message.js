@@ -13,7 +13,7 @@ const messageSchema = new Schema(
       ref: "User",
       required: true,
     },
-    data: {
+    text: {
       type: String,
       required: true,
     },
