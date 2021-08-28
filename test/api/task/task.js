@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 const request = require("supertest");
 const { app } = require("../../../app.js");
@@ -84,7 +83,7 @@ describe("tasks", () => {
           type: "ux",
           score: "10",
           userId: userId,
-          description: "description"
+          description: "description",
         })
         .expect(201)
         .then((res) => {
@@ -207,7 +206,6 @@ describe("tasks", () => {
         .expect(403)
         .then((res) => {
           chaiExpect(res.body).to.not.have.property("task");
- 
         });
     });
     it("change status of task from pre-report to completed", () => {
@@ -217,7 +215,7 @@ describe("tasks", () => {
         .send({
           status: "completed",
           taskId: taskId,
-          feedback : 5
+          feedback: 5,
         })
         .expect(200)
         .then((res) => {
@@ -226,7 +224,7 @@ describe("tasks", () => {
           chaiExpect(res.body.task).to.have.property("startDateTime");
           chaiExpect(res.body.task).to.have.property("estimatedDateTime");
           chaiExpect(res.body.task).to.have.property("endDateTime");
-          chaiExpect(res.body.task).to.have.property("feedback",5);
+          chaiExpect(res.body.task).to.have.property("feedback", 5);
         });
     });
 
@@ -281,6 +279,17 @@ describe("tasks", () => {
         .then((res) => {
           chaiExpect(res.body).to.not.have.property("tasks");
         });
+    });
+
+    describe("delete tasks", () => {
+      it("delete task succeed", () => {
+        return request(app)
+          .delete("/tasks/")
+          .set("Authorization", "Bearer " + jwt)
+          .send({ taskId })
+          .expect(200)
+          .then((res) => {});
+      });
     });
   });
 });
