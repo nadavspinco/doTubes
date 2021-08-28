@@ -1,7 +1,7 @@
-const app = require("../../../app.js");
+
 const mongoose = require("mongoose");
 const request = require("supertest");
-
+const { app } = require("../../../app.js");
 const { assert, expect: chaiExpect } = require("chai");
 describe("tasks", () => {
   let jwt, teamId, jwt2, tubeId, userId, userId2, taskId;

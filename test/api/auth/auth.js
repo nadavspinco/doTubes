@@ -1,5 +1,5 @@
 const { signup } = require("../../../controllers/auth");
-const app = require("../../../app.js");
+const { app } = require("../../../app.js");
 const mongoose = require("mongoose");
 const request = require("supertest");
 
