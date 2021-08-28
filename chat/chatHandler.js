@@ -41,7 +41,7 @@ exports.chatHandler = (socket) => {
   });
 
 
-  socket.on("chatMessage", (data, tubeId) => {
+  socket.on("chatMessage", (text, tubeId) => {
     io = getIo();
       const { userId, tubeId: tubeIdSocket } = socket;
       
@@ -54,7 +54,7 @@ exports.chatHandler = (socket) => {
                  return;
              }
       const message = new Message({
-        data,
+        text,
         user: new ObjectId(userId),
         tube: new ObjectId(tubeId),
       });
