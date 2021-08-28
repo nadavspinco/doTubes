@@ -16,7 +16,6 @@ const cors = require("cors");
 var methodOverride = require("method-override");
 const NODE_ENV = process.env.NODE_ENV || "test";
 const app = express();
-const server = http.createServer(app);
 const  chat   = require('./chat/chatHandler');
 let io;
 const socketIoModule = require('./utils/io')
@@ -52,6 +51,9 @@ app.use(function (error, req, res, next) {
 
   //X-Status-Reason: Validation failed
 });
+
+
+const server = http.createServer(app);
 
 if (NODE_ENV !== "test") {
   mongoose
