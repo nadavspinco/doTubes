@@ -6,35 +6,29 @@ const request = require("supertest");
 const { assert, expect: chaiExpect } = require("chai");
 const { deleteOne } = require("../../../models/user");
 
-
-
-
 describe("auth", () => {
   let jwt;
   before(() => {
-    
     const uri = "mongodb://localhost:27017/doTubes";
     return mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-  })
+  });
   after(() => {
     return mongoose.disconnect();
-  })
-
+  });
 
   afterEach(() => {
-      return mongoose.connection.db.dropDatabase();
-  })
-
+    return mongoose.connection.db.dropDatabase();
+  });
 
   describe("sign up", () => {
     it("signup successful ", () => {
       return request(app)
         .post("/auth/signup")
         .send({
-          email: "kso@walla.com",
+          email: "user@walla.com",
           fullName: "avi c",
           password: "123456Aa!",
         })
@@ -63,20 +57,20 @@ describe("auth", () => {
       return request(app)
         .post("/auth/signup")
         .send({
-          email: "kso@walla.com",
+          email: "user@walla.com",
           fullName: "avi c",
           password: "123456Aa!",
         })
         .expect(201)
-        .then(res => {
+        .then((res) => {
           jwt = res.body.jwt;
-        })
+        });
     });
     it("login succeed ", () => {
       return request(app)
         .post("/auth/login")
         .send({
-          email: "kso@walla.com",
+          email: "user@walla.com",
           password: "123456Aa!",
         })
         .expect(200)
@@ -117,32 +111,32 @@ describe("auth", () => {
         .then((res) => {
           chaiExpect(res.body).to.have.property("user");
           const { user } = res.body;
-          chaiExpect(user).to.have.property("email", "kso@walla.com");
-          chaiExpect(user).to.have.property("fullName",'avi c');
+          chaiExpect(user).to.have.property("email", "user@walla.com");
+          chaiExpect(user).to.have.property("fullName", "avi c");
         });
-    })
-        it("get user failed wrong jwt", () => {
-          return request(app)
-            .get("/auth/userData")
-            .set("Authorization", "Bearer " + jwt + "a")
-            .expect(401)
-        });
-  })
+    });
+    it("get user failed wrong jwt", () => {
+      return request(app)
+        .get("/auth/userData")
+        .set("Authorization", "Bearer " + jwt + "a")
+        .expect(401);
+    });
+  });
   describe("update user", () => {
-       beforeEach(() => {
-         return request(app)
-           .post("/auth/signup")
-           .send({
-             email: "kso@walla.com",
-             fullName: "avi c",
-             password: "123456Aa!",
-           })
-           .expect(201)
-           .then((res) => {
-             jwt = res.body.jwt;
-           });
-       });
-    
+    beforeEach(() => {
+      return request(app)
+        .post("/auth/signup")
+        .send({
+          email: "kso@walla.com",
+          fullName: "avi c",
+          password: "123456Aa!",
+        })
+        .expect(201)
+        .then((res) => {
+          jwt = res.body.jwt;
+        });
+    });
+
     it("update user succeed", () => {
       return request(app)
         .put("/auth/updateUser")
@@ -164,7 +158,6 @@ describe("auth", () => {
         });
     });
 
-    
     it("update user with new password succeed", () => {
       return request(app)
         .put("/auth/updateUser")
@@ -187,8 +180,7 @@ describe("auth", () => {
           chaiExpect(user).to.have.property("description", "hr recruitment");
         });
     });
-      
-      
+
     it("update user failed, no old password", () => {
       return request(app)
         .put("/auth/updateUser")
@@ -198,7 +190,7 @@ describe("auth", () => {
           role: "hr",
           fullName: "avi",
           description: "hr recruitment",
-          newPassword: "98745613As@"
+          newPassword: "98745613As@",
         })
         .expect(401)
         .then((res) => {
@@ -215,15 +207,12 @@ describe("auth", () => {
           fullName: "avi",
           description: "hr recruitment",
           newPassword: "98745613As@",
-          oldPassword: "123496Aa!"
+          oldPassword: "123496Aa!",
         })
         .expect(401)
         .then((res) => {
           chaiExpect(res.body).to.not.have.property("user");
         });
     });
-      
-
-  
   });
 });

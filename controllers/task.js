@@ -10,6 +10,10 @@ const { handleErrors } = require("./error.js");
 
 const ObjectId = require("mongodb").ObjectId;
 
+const { isValidMongoId } = require("../utils/validation");
+
+const message = require("../chat/model/message.js");
+
 exports.addTask = async (req, res, next) => {
   try {
     handleErrors(req, res, next, 400);
@@ -28,7 +32,7 @@ exports.addTask = async (req, res, next) => {
       name: name,
       type: type,
       tube: tube._id,
-      description: description
+      description: description,
     });
     if (userId && !tube.users.includes(new ObjectId(userId))) {
       res.status(401).json({ message: "user is not part of the tube" });
@@ -94,14 +98,14 @@ exports.changeTaskStatus = (req, res, next) => {
         return;
       }
       if (
-        (task.status === "pre-report" &&
-          status === "completed" &&
-          feedback === undefined) 
+        task.status === "pre-report" &&
+        status === "completed" &&
+        feedback === undefined
       ) {
         res.status(403).json({ message: "feedback must be provided" });
         return;
       }
-      updateStatus(task, status, estimatedTime,feedback)
+      updateStatus(task, status, estimatedTime, feedback)
         .then((result) => {
           if (!result) {
             res.status(500).json({ message: "unable to save the task" });
@@ -159,7 +163,7 @@ const isValidStatus = (currentStatus, nextStatus) => {
   return false;
 };
 
-const updateStatus = async (task, newStatus, estimatedTime,feedback) => {
+const updateStatus = async (task, newStatus, estimatedTime, feedback) => {
   if (newStatus === "in-process" && task.status === "pre-estimated") {
     task.startDateTime = new Date();
     task.estimatedDateTime = new Date(estimatedTime);
@@ -174,6 +178,47 @@ const updateStatus = async (task, newStatus, estimatedTime,feedback) => {
   task.status = newStatus;
 
   return await task.save();
+};
+
+exports.deleteTask = (req, res, next) => {
+  handleErrors(req, res, next, 400);
+  const { user, _id, taskId } = req.body;
+  if (!isValidMongoId(taskId)) {
+    res.status(400).json({ message: "invalid task id" });
+    return;
+  }
+  Task.findById(taskId)
+    .populate("tube")
+    .then((task) => {
+      if (!task) {
+        res.status(404).json({ message: "task was not found" });
+        return;
+      }
+      if (task.tube.admin.toString() !== _id) {
+        res.status(401).json({ message: "only tube admin can delete tasks" });
+        return;
+      }
+      if (task.status === "completed") {
+        task.tube.currentScore -= task.score;
+      }
+      task.tube.totalScore -= task.score;
+      const tube = task.tube;
+      tube.save().then((tube) => {
+        if (!tube) {
+          res.status(500).json({ message: "server error" });
+          return;
+        }
+        Task.findByIdAndDelete(task._id).then((result) => {
+          if (!result) {
+            res.status(500).json({ message: "server error" });
+          }
+          res.json({ message: "task was deleted" });
+        });
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({ message: error.message });
+    });
 };
 
 exports.getUserTasksByTube = (req, res, next) => {

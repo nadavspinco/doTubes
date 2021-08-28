@@ -40,7 +40,7 @@ router.put(
     }),
     body("taskId").trim().not().isEmpty(),
     body("feedback").custom((value, { req }) => {
-      return value === undefined || (value >=1 && value <=10)
+      return value === undefined || (value >= 1 && value <= 10);
     }),
   ],
   isAuth,
@@ -48,5 +48,12 @@ router.put(
 );
 
 router.get("/:tubeId", isAuth, controller.getUserTasksByTube);
+
+router.delete(
+  "/",
+  body("taskId").trim().not().isEmpty(),
+  isAuth,
+  controller.deleteTask
+);
 
 module.exports = router;
