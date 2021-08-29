@@ -58,14 +58,13 @@ const getAllAnalytics = (
       }
 
       if (
-        (userId === undefined &&
-          team.admin.toString() !== user._id.toString()) ||
+        userId !== undefined &&
         (team.admin.toString() !== user._id.toString() &&
           userId !== user._id.toString())
       ) {
         res
           .status(401)
-          .json({ message: "only admin can get the team analytics" });
+          .json({ message: "only admin can get analytics on other team members" });
         return;
       }
 
