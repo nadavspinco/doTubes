@@ -87,6 +87,7 @@ describe("tasks", () => {
         })
         .expect(201)
         .then((res) => {
+          console.log(res);
           chaiExpect(res.body).to.have.property("task");
           chaiExpect(res.body.task).to.have.property("status", "pending");
           taskId = res.body.task._id;

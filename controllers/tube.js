@@ -8,7 +8,7 @@ const Tube = require("../models/tube.js");
 
 const { handleErrors } = require("./error.js");
 
-const Task = require("../models/task");
+const { Task } = require("../models/task");
 
 exports.addTube = async (req, res, next) => {
   try {

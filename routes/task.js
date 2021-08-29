@@ -8,12 +8,13 @@ const isAuth = require("../middleware/is-Auth");
 
 const { body } = require("express-validator");
 
+const { typesArray } = require("../models/task");
+
 router.post(
   "/",
   [
     body("type").custom((value, { req }) => {
-      const types = ["ux", "ui", "aws", "git", "fixing bugs"];
-      return types.includes(value);
+      return typesArray.includes(value);
     }),
     body("score").isNumeric({ min: 10, max: 100 }),
     body("name").trim().not().isEmpty(),
