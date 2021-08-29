@@ -1,5 +1,20 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const typesArray = Object.freeze([
+  "ux",
+  "ui",
+  "aws",
+  "git",
+  "fixing bugs",
+  "server Side",
+  "client Side",
+  "ai",
+  "testing",
+  "data science",
+  "communication",
+  "big data",
+  "other",
+]);
 
 const taskSchema = new Schema(
   {
@@ -28,7 +43,7 @@ const taskSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ["ux", "ui", "aws", "git", "fixing bugs"],
+      enum: typesArray,
       required: true,
     },
     status: {
@@ -55,10 +70,11 @@ const taskSchema = new Schema(
     feedback: {
       type: Number,
       min: 1,
-      max: 10
-    }
+      max: 10,
+    },
   },
   { timestamps: true }
 );
+exports.Task = mongoose.model("Task", taskSchema);
 
-module.exports = mongoose.model("Task", taskSchema);
+exports.typesArray = typesArray;
