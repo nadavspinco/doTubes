@@ -148,6 +148,7 @@ exports.getTubeDetails = async (req, res, next) => {
             return {
               task,
               isMyTask: task.exacutor._id.toString() === user._id.toString(),
+              
             };
           });
           res.json({

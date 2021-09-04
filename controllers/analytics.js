@@ -4,7 +4,7 @@ const User = require("../models/user.js");
 
 const Tube = require("../models/tube.js");
 
-const Task = require("../models/task");
+const { Task } = require("../models/task");
 
 const ObjectId = require("mongodb").ObjectId;
 
