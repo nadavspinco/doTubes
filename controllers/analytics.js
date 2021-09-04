@@ -56,15 +56,18 @@ const getAllAnalytics = (
         res.status(401).json({ message: "user is not part of this team" });
         return;
       }
-
+      if (userId !== undefined || !isValidMongoId(userId)) {
+        res.status(400).json({ message: "user id is invalid" });
+        return;
+      }
       if (
         userId !== undefined &&
-        (team.admin.toString() !== user._id.toString() &&
-          userId !== user._id.toString())
+        team.admin.toString() !== user._id.toString() &&
+        userId !== user._id.toString()
       ) {
-        res
-          .status(401)
-          .json({ message: "only admin can get analytics on other team members" });
+        res.status(401).json({
+          message: "only admin can get analytics on other team members",
+        });
         return;
       }
 
