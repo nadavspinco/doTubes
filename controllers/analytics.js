@@ -117,7 +117,7 @@ exports.getAllAnalytics = (req, res, next) => {
 
     if (
       (userId !== undefined  &&(
-      (team.admin.toString() === user._id.toString() ||
+      (team.admin.toString() !== user._id.toString() ||
         userId !== user._id.toString()))))
      {
 
