@@ -116,10 +116,11 @@ exports.getAllAnalytics = (req, res, next) => {
     }
 
     if (
-      (userId === undefined && team.admin.toString() !== user._id.toString()) ||
-      (team.admin.toString() !== user._id.toString() &&
-        userId !== user._id.toString())
-    ) {
+      (userId !== undefined  &&(
+      (team.admin.toString() === user._id.toString() ||
+        userId !== user._id.toString()))))
+     {
+
       res
         .status(401)
         .json({ message: "only admin can get the team analytics" });
